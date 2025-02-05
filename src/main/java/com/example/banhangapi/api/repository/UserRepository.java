@@ -1,0 +1,15 @@
+package com.example.banhangapi.api.repository;
+
+import com.example.banhangapi.api.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+    User findByUsername(String username);
+    Boolean deleteByUsername(String username);
+    Boolean existsByUsername(String username);
+}
