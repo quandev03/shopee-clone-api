@@ -1,4 +1,4 @@
-package com.example.banhangapi.api.entity;
+package com.example.banhangapi.api.globalEnum;
 
 public enum ROLES {
     ROLE_ADMIN,

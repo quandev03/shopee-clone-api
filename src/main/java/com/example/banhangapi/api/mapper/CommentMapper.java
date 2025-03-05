@@ -1,7 +1,7 @@
 package com.example.banhangapi.api.mapper;
 
 import com.example.banhangapi.api.entity.Comment;
-import com.example.banhangapi.api.entity.CommentDTO;
+import com.example.banhangapi.api.dto.CommentDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

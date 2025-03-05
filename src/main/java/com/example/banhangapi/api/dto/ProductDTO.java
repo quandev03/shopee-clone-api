@@ -1,5 +1,6 @@
-package com.example.banhangapi.api.entity;
+package com.example.banhangapi.api.dto;
 
+import com.example.banhangapi.api.entity.Image;
 import lombok.*;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ProductDTO implements Serializable {
-    private Long id;
+    private String id;
     private String nameProduce;
     private String description;
     private float price;
@@ -20,5 +21,6 @@ public class ProductDTO implements Serializable {
     private long soldQuantity;
     private long viewedQuantity;
     private List<CommentDTO> comments;
+    List<ImageResponseDTO> image;
 
 }

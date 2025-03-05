@@ -16,27 +16,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "product")
+@Table(name = "products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product implements Serializable {
+public class ProductEntity implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
 
-    @CreationTimestamp
-    protected LocalDateTime createTime;
+    @CreationTimestamp()
+    LocalDateTime createTime;
 
-    @UpdateTimestamp
-    protected LocalDateTime updateTime;
+    @UpdateTimestamp()
+    LocalDateTime updateTime;
 
-    // Thiết lập mối quan hệ Many-to-One tới User
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "createBy", nullable = true)
+    @JoinColumn(name = "create_by", nullable = true)
     @CreatedBy
-    protected User createBy;
+    User createBy;
 
     @Column(nullable = false, unique = true, name = "nameProduct")
     private String nameProduct;
@@ -47,22 +46,22 @@ public class Product implements Serializable {
     @Min(value = 0)
     private long soldQuantity;
 
-    @ColumnDefault("0L")
+    @ColumnDefault("0")
     private Long viewedQuantity = 0L;
-
-    @OneToMany(
-            mappedBy = "product",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private List<Comment> comments = new ArrayList<>();
-
-    public void addComment(Comment comment) {
-        comments.add(comment);
-    }
-
-    public void removeComment(Comment comment) {
-        comments.remove(comment);
-    }
+//
+//    @OneToMany(
+//            mappedBy = "productEntity",
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true
+//    )
+//    private List<Comment> commentEntities = new ArrayList<>();
+//
+//    public void addComment(Comment commentEntity) {
+//        commentEntities.add(commentEntity);
+//    }
+//
+//    public void removeComment(Comment commentEntity) {
+//        commentEntities.remove(commentEntity);
+//    }
 
 }

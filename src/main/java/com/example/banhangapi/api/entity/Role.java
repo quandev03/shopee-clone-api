@@ -1,5 +1,7 @@
 package com.example.banhangapi.api.entity;
 
+import com.example.banhangapi.api.globalEnum.ROLES;
+
 public class Role {
     private ROLES id;
     private String name;

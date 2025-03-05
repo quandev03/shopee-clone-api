@@ -1,6 +1,6 @@
 package com.example.banhangapi.security;
 
-import com.example.banhangapi.api.service.UserService;
+import com.example.banhangapi.api.service.implement.UserServiceImple;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,8 +26,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // Method to lazily fetch the UserService bean from the ApplicationContext
     // This is done to avoid Circular Dependency issues
-    private UserService getUserService() {
-        return applicationContext.getBean(UserService.class);
+    private UserServiceImple getUserService() {
+        return applicationContext.getBean(UserServiceImple.class);
     }
 
     @Override

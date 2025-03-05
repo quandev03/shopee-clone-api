@@ -1,7 +1,7 @@
 package com.example.banhangapi.api.mapper;
 
 import com.example.banhangapi.api.entity.User;
-import com.example.banhangapi.api.entity.UserDto;
+import com.example.banhangapi.api.dto.UserDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

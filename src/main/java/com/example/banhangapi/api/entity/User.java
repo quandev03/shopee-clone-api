@@ -1,5 +1,6 @@
 package com.example.banhangapi.api.entity;
 
+import com.example.banhangapi.api.globalEnum.ROLES;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -25,8 +26,8 @@ import java.util.List;
 public class User  implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    protected String id;
 
     @CreationTimestamp
     protected LocalDateTime createTime;
@@ -64,6 +65,23 @@ public class User  implements Serializable {
             orphanRemoval = true,
             mappedBy = "createBy"
     )
-    @JsonIgnore
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToOne
+    Address addressUser;
+
+//    @OneToMany(
+//            mappedBy = "user",
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true
+//    )
+//    @JsonIgnore
+//    List<Cart> carts = new ArrayList<>();
+//    public void addCart(Cart cart) {
+//        this.carts.add(cart);
+//    }
+//    public void removeCart(Cart cart) {
+//        this.carts.remove(cart);
+//    }
+
 }

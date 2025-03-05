@@ -4,6 +4,7 @@ import com.example.banhangapi.api.entity.User;
 import com.example.banhangapi.api.repository.UserRepository;
 import com.example.banhangapi.api.request.*;
 import com.example.banhangapi.api.service.UserService;
+import com.example.banhangapi.api.service.implement.UserServiceImple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +20,7 @@ public class AuthController {
     UserRepository userRepositoty;
 
     @Autowired
-    UserService userService;
+    UserServiceImple userService;
 
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     public Page<User> user(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
@@ -29,8 +30,8 @@ public class AuthController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity<?> register(@RequestBody RequestRegister user) {
-        return this.userService.RegisterAccount(user);
+    public ResponseEntity<Object> register(@RequestBody RequestRegister user) {
+        return ResponseEntity.ok(this.userService.RegisterAccount(user));
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

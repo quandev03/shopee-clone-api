@@ -1,6 +1,6 @@
 package com.example.banhangapi.kafka;
 
-import com.example.banhangapi.api.service.ProductService;
+import com.example.banhangapi.api.service.implement.ProductServiceImple;
 import com.example.banhangapi.redis.RedisServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -12,7 +12,7 @@ public class MessageConsumer {
     private RedisServiceImpl redisService;
 
     @Autowired
-    private ProductService produceService;
+    private ProductServiceImple produceService;
 
 
     @KafkaListener(topics = "techmaster", groupId = "techmaster")

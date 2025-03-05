@@ -1,7 +1,7 @@
 package com.example.banhangapi.security;
 
 
-import com.example.banhangapi.api.service.UserService;
+import com.example.banhangapi.api.service.implement.UserServiceImple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new UserService();
+        return new UserServiceImple();
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -40,13 +40,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
-                                        "auth/login", "auth/register", "produce/search", "produce/get-list", "produce/dataProduce","auth/refresh-token"
+                                        "auth/login", "auth/register", "produce/search", "produce/get-list", "product/dataProduct","auth/refresh-token", "/address-manage/*",
+                                        "api-admin-manager/get-data-voucher", "api-admin-manager/get-list-voucher-can-apply"
                                 ).permitAll()
-                                .requestMatchers("auth/search","auth/user", "auth/update", "auth/reset-password", "comment/delete-comment", "comment/add-comment", "comment/edit-comment").authenticated()
+                                .requestMatchers("auth/search","auth/user", "auth/update", "auth/reset-password", "comment/delete-comment", "comment/add-comment", "comment/edit-comment",
+                                        "address-manage/add-new-my-address", "/cart-order/add-product-in-cart"
+                                ).authenticated()
                                 .requestMatchers(
-                                        "/produce/create",
+                                        "/product/create",
                                         "produce/update", "produce/delete",
-                                        "auth/delete"
+                                        "auth/delete", "api-admin-manager/*", "product/upload-image"
                                 ).hasRole("ADMIN")
                          )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Set session management to stateless

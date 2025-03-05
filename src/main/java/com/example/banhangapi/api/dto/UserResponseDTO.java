@@ -1,4 +1,4 @@
-package com.example.banhangapi.api.entity;
+package com.example.banhangapi.api.dto;
 
 import lombok.*;
 
@@ -8,7 +8,9 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-public class UserDto {
+public class UserResponseDTO {
     private Long id;
     private String username;
+    private String address;
+    private String phoneNumber;
 }

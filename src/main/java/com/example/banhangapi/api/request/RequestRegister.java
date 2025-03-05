@@ -24,5 +24,4 @@ public class RequestRegister {
     @Size(min = 10, max = 10, message = "Phone number is incorrect")
     private String phoneNumber;
 
-    private String address;
 }

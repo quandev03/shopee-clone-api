@@ -1,4 +1,4 @@
-package com.example.banhangapi.api.entity;
+package com.example.banhangapi.api.dto;
 
 import lombok.*;
 

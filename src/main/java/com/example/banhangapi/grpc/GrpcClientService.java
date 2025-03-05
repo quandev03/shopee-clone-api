@@ -1,8 +1,7 @@
 package com.example.banhangapi.grpc;
 
-import com.example.banhangapi.api.entity.Product;
+import com.example.banhangapi.api.entity.ProductEntity;
 import com.example.banhangapi.api.request.RequestSearch;
-import com.example.banhangapi.api.request.RequestSearchProduct;
 import com.example.grpc.SearchServiceGrpc;
 import com.example.grpc.SearchServiceProto;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,15 +23,15 @@ public class GrpcClientService {
     @GrpcClient("searchService")
     private SearchServiceGrpc.SearchServiceBlockingStub searchServiceStub;
 
-    public List<Product> searchProduct(String query) {
+    public List<ProductEntity> searchProduct(String query) {
         SearchServiceProto.SearchRequest request = SearchServiceProto.SearchRequest.newBuilder()
                 .setQuery(query)
                 .build();
         SearchServiceProto.SearchResponse response = searchServiceStub.searchProduct(request);
         String responseJson = response.getResults(0);
-        List<Product> products;
+        List<ProductEntity> products;
         try {
-            products = objectMapper.readValue(responseJson, new TypeReference<List<Product>>() {});
+            products = objectMapper.readValue(responseJson, new TypeReference<List<ProductEntity>>() {});
         }catch (Exception e){
             throw new RuntimeException();
         }
