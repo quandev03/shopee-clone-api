@@ -16,4 +16,9 @@ public class OrderAndCartRest implements OrderAndCartOperator {
 
         return ResponseEntity.ok(cartService.addCart(productId, quantity));
     }
+
+    @Override
+    public ResponseEntity<Object> getCart() {
+        return ResponseEntity.ok(cartService.getAllCartOfUser());
+    }
 }

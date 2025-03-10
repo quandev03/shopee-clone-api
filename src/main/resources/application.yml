@@ -31,6 +31,8 @@ spring:
   firebase:
     url: ${URL_FIREBASE}
     bucketname: ${BUCKET_NAME}
+  fe:
+    baseurl:${URL_FE}
 
 
 

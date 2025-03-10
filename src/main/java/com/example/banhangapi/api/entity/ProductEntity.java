@@ -48,6 +48,9 @@ public class ProductEntity implements Serializable {
 
     @ColumnDefault("0")
     private Long viewedQuantity = 0L;
+
+    private String image;
+
 //
 //    @OneToMany(
 //            mappedBy = "productEntity",
@@ -64,4 +67,6 @@ public class ProductEntity implements Serializable {
 //        commentEntities.remove(commentEntity);
 //    }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Category category;
 }

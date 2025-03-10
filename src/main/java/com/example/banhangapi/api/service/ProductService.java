@@ -1,7 +1,9 @@
 package com.example.banhangapi.api.service;
 
 import com.example.banhangapi.api.dto.ProductDTO;
+import com.example.banhangapi.api.entity.Category;
 import com.example.banhangapi.api.entity.ProductEntity;
+import com.example.banhangapi.api.request.CategoryRequest;
 import com.example.banhangapi.api.request.RequestCreateProduct;
 import com.example.banhangapi.api.request.RequestSearchProduct;
 import org.springframework.data.domain.Page;
@@ -24,4 +26,7 @@ public interface ProductService {
     List<ProductEntity> searchProduct(RequestSearchProduct requestSearchProduct);
 
     String uploadImageForProduct(MultipartFile file, String id, boolean isDefault);
+
+    Category createCategory(CategoryRequest categoryRequest);
+    List<ProductDTO> getListProductByCategory(String categoryID);
 }

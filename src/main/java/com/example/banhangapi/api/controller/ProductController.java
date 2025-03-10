@@ -2,6 +2,7 @@ package com.example.banhangapi.api.controller;
 
 import com.example.banhangapi.api.dto.ProductDTO;
 import com.example.banhangapi.api.entity.ProductEntity;
+import com.example.banhangapi.api.request.CategoryRequest;
 import com.example.banhangapi.api.request.RequestCreateProduct;
 import com.example.banhangapi.api.request.RequestSearchProduct;
 import com.example.banhangapi.api.service.ProductService;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/product")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@CrossOrigin(origins = "http://localhost:3000")
 public class ProductController {
 
     @Autowired
@@ -59,7 +61,7 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        return  this.productService.getListProduct(page, size);
+        return this.productService.getListProduct(page, size);
     }
 
     @RequestMapping(value = "search", method = RequestMethod.GET)
@@ -70,7 +72,20 @@ public class ProductController {
         return this.productService.searchProduct(requestSearchProduct);
     }
     @PostMapping("upload-image")
-    public ResponseEntity<?> uploadImage(@RequestPart MultipartFile file, @RequestParam String productId, @RequestParam(defaultValue = "true") boolean isDefault) {
+    public ResponseEntity<?> uploadImage(@RequestPart MultipartFile file, @RequestParam String productId, @RequestPart() boolean isDefault) {
         return ResponseEntity.ok(productService.uploadImageForProduct(file, productId, isDefault));
+    }
+
+    @PostMapping("create-new-category")
+    public ResponseEntity<Object> createCategory(CategoryRequest categoryRequest) {
+        return ResponseEntity.ok(productService.createCategory(categoryRequest));
+    }
+    @GetMapping("get-list-product-by-category")
+    public ResponseEntity<List<ProductDTO>> getListProductByCategory(@RequestParam String categoryId) {
+        return ResponseEntity.ok(productService.getListProductByCategory(categoryId));
+    }
+    @GetMapping("get-list-category")
+    public ResponseEntity<Object> getListCategory(){
+        return ResponseEntity.ok(null);
     }
 }

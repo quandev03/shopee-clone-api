@@ -7,10 +7,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", uses = {ImageMapper.class})
+@Mapper(componentModel = "spring", uses = {ImageMapper.class, CategoryMapper.class})
 public interface ProductMapper {
     ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
     ProductEntity toProduct(ProductDTO productDTO);
+    @Mapping(source = "nameProduct", target = "nameProduct")
     ProductDTO toProductDTO(ProductEntity product);
 
     @Mapping(source = "price", target = "price")

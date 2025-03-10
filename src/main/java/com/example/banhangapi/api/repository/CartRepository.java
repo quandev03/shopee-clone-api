@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 
 public interface CartRepository extends JpaRepository<Cart, String>, JpaSpecificationExecutor<Cart> {
-    List<CartResponseDTO> findByCreatedBy(User createdBy);
+    List<Cart> findByCreatedBy(User createdBy);
     Boolean existsByProductAndCreatedBy(ProductEntity id, User createdBy);
     List<Cart> findAllByCheckedAndCreatedBy(Boolean check, User createBy);
 }

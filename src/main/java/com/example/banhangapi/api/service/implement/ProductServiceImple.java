@@ -2,12 +2,15 @@ package com.example.banhangapi.api.service.implement;
 
 import com.example.banhangapi.api.dto.ImageResponseDTO;
 import com.example.banhangapi.api.dto.ProductDTO;
+import com.example.banhangapi.api.entity.Category;
 import com.example.banhangapi.api.entity.Image;
 import com.example.banhangapi.api.entity.ProductEntity;
 import com.example.banhangapi.api.mapper.ImageMapper;
 import com.example.banhangapi.api.mapper.ProductMapper;
+import com.example.banhangapi.api.repository.CategoryRepository;
 import com.example.banhangapi.api.repository.ImageRepository;
 import com.example.banhangapi.api.repository.ProductRepository;
+import com.example.banhangapi.api.request.CategoryRequest;
 import com.example.banhangapi.api.request.RequestCreateProduct;
 import com.example.banhangapi.api.request.RequestSearchProduct;
 import com.example.banhangapi.api.service.ImageService;
@@ -56,6 +59,7 @@ public class ProductServiceImple implements ProductService {
     final ImageService imageService;
     final ImageMapper imageMapper;
     private final ImageRepository imageRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional
     public ResponseEntity<?> createNewProduct(RequestCreateProduct dataCreateNewProduct) {
@@ -76,14 +80,13 @@ public class ProductServiceImple implements ProductService {
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<ProductEntity> products = productRepository.findAll(pageable);
-            Page<ProductDTO> productDTOs = new PageImpl<>(
+            return new PageImpl<>(
                     products.stream()
-                            .map(product -> productMapper.toProductDTO(product))
+                            .map(productMapper::toProductDTO)
                             .collect(Collectors.toList()),
                     pageable,
                     size
             );
-            return productDTOs;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -124,7 +127,9 @@ public class ProductServiceImple implements ProductService {
                 ProductEntity product = productRepository.findById(idProduce).orElseThrow(()-> new ProductNotFoundException("Product not found"));
                 ProductDTO produceDTO = productMapper.toProductDTO(product);
                 List<ImageResponseDTO> listImage = imageRepository.findAllByProduct(product).stream().map((imageMapper::toImageResponseDTO)).toList();
-                produceDTO.setImage(listImage);
+                List<String> images = listImage.stream().map(ImageResponseDTO::getPathImage).toList();
+                produceDTO.setImages(images);
+                produceDTO.setImage(images.getFirst());
                 return produceDTO;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -167,7 +172,25 @@ public class ProductServiceImple implements ProductService {
         image.setPathImage(uploadFileDTO.getFile());
         image.setDescription("anh san pham");
         image.setDefaultImage(isDefault);
-        imageRepository.save(image);
+
+        Image image1 = imageRepository.save(image);
+        if(isDefault) {
+            product.setImage(image1.getPathImage());
+        }
         return "SUCCESS";
+    }
+    @Override
+    @SneakyThrows
+    public Category createCategory(CategoryRequest categoryRequest){
+        Category category = new Category();
+        category.setName(categoryRequest.getName());
+        category = categoryRepository.save(category);
+        return category;
+    }
+    @Override
+    @SneakyThrows
+    public List<ProductDTO> getListProductByCategory(String categoryID){
+        Category category = categoryRepository.findById(categoryID).orElseThrow(()->new RuntimeException("Category not found"));
+        return productRepository.findAllByCategory(category).stream().map(productMapper::toProductDTO).collect(Collectors.toList());
     }
 }

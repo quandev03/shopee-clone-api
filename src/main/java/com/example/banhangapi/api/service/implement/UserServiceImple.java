@@ -104,7 +104,7 @@ public class UserServiceImple implements UserDetailsService {
                 String keyToken = "key_token_"+ user.getUsername();
                 String refreshToken = jwtService.createRefreshToken(user.getUsername());
                 redisService.saveData(keyToken, refreshToken, 302400100);
-                ResponseDto responseDto = new ResponseDto(user.getUsername(), jwtService.generateToken(user.getUsername()), refreshToken);
+                ResponseDto responseDto = new ResponseDto(user.getUsername(), jwtService.generateToken(user.getUsername()), refreshToken, user.getRoles(), null, user.getId());
                 return new ResponseEntity<>(responseDto, HttpStatus.OK);
             }
             else{

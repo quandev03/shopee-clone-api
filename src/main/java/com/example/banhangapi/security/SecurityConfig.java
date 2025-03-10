@@ -40,15 +40,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
-                                        "auth/login", "auth/register", "produce/search", "produce/get-list", "product/dataProduct","auth/refresh-token", "/address-manage/*",
-                                        "api-admin-manager/get-data-voucher", "api-admin-manager/get-list-voucher-can-apply"
+                                        "auth/login", "auth/register", "product/search", "product/get-list", "product/dataProduct","auth/refresh-token", "/address-manage/*",
+                                        "api-admin-manager/get-data-voucher", "api-admin-manager/get-list-voucher-can-apply", "product/get-list-category"
                                 ).permitAll()
                                 .requestMatchers("auth/search","auth/user", "auth/update", "auth/reset-password", "comment/delete-comment", "comment/add-comment", "comment/edit-comment",
-                                        "address-manage/add-new-my-address", "/cart-order/add-product-in-cart"
+                                        "address-manage/add-new-my-address", "/cart-order/add-product-in-cart", "cart-order/get-data-cart"
                                 ).authenticated()
                                 .requestMatchers(
                                         "/product/create",
-                                        "produce/update", "produce/delete",
+                                        "product/update", "product/delete",
                                         "auth/delete", "api-admin-manager/*", "product/upload-image"
                                 ).hasRole("ADMIN")
                          )

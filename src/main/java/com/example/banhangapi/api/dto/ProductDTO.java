@@ -14,13 +14,16 @@ import java.util.List;
 @Builder
 public class ProductDTO implements Serializable {
     private String id;
-    private String nameProduce;
+    private String nameProduct;
     private String description;
     private float price;
     private long quantity;
     private long soldQuantity;
     private long viewedQuantity;
-    private List<CommentDTO> comments;
-    List<ImageResponseDTO> image;
+    private List<String> images;
+    private String image;
+    private CategoryResponseDTO category;
+
+
 
 }

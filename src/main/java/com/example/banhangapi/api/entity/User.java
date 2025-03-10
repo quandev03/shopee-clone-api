@@ -27,19 +27,19 @@ public class User  implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    protected String id;
+    private String id;
 
     @CreationTimestamp
-    protected LocalDateTime createTime;
+    private LocalDateTime createTime;
 
     @UpdateTimestamp
-    protected LocalDateTime updateTime;
+    private LocalDateTime updateTime;
 
     // Thiết lập mối quan hệ Many-to-One tới User
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "create_by", nullable = true)
     @CreatedBy
-    protected User createBy;
+    private User createBy;
 
     @Column(nullable = false, unique = true)
     @Pattern(regexp = "^[a-zA-Z0-9_]{5,20}$", message = "Username is incorrect!")
