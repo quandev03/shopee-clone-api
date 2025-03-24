@@ -1,5 +1,6 @@
 package com.example.banhangapi.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,8 +27,6 @@ public class Category {
     @Column
     private String name;
 
-    @OneToMany
-    private List<ProductEntity> products;
 
     @CreationTimestamp
     private LocalDateTime createTime;
@@ -37,5 +36,6 @@ public class Category {
 
     @ManyToOne
     @CreatedBy
+    @JsonIgnore
     private User user;
 }

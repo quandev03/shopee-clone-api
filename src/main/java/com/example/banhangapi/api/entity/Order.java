@@ -1,5 +1,7 @@
 package com.example.banhangapi.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -10,20 +12,19 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import com.example.banhangapi.api.globalEnum.StatusOrder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Entity(name = "orders")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Order implements Serializable {
+@EntityListeners(AuditingEntityListener.class)
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
@@ -35,33 +36,23 @@ public class Order implements Serializable {
     LocalDateTime updateTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "createBy", nullable = true)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @CreatedBy()
     User createdBy;
 
+    @Enumerated(EnumType.ORDINAL)
     StatusOrder statusOrder = StatusOrder.ORDER_WAITING_FOR_CONFIRMATION;
 
-    Long totalAmountOrder;
+    int quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    Voucher voucherApplyForOrder;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    ProductEntity productEntity;
 
-
-
-    @OneToMany(
-            mappedBy = "order",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    List<OrderDetails> orderDetails = new ArrayList<>();
-
-    public void  addOrderDetailForOrder(OrderDetails newOrder){
-        orderDetails.add(newOrder);
-    };
-
-    public void removeOrderDetail(OrderDetails orderDetails){
-        this.orderDetails.remove(orderDetails);
-    }
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnore
+    AddressUser addressUser;
 
 
 }

@@ -19,7 +19,9 @@ public class MyAddressRequest {
     private String specailAddress;
     private String detailAddress;
     @Nullable
-    private boolean isDefault;
+    private boolean defaultAddress;
     @NotNull
-    private String numberPhone;
+    private String phone;
+    private String fullName;
+
 }

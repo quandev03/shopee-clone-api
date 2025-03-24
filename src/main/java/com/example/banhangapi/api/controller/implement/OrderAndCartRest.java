@@ -1,16 +1,27 @@
 package com.example.banhangapi.api.controller.implement;
 
 import com.example.banhangapi.api.controller.OrderAndCartOperator;
+import com.example.banhangapi.api.entity.Order;
+import com.example.banhangapi.api.globalEnum.StatusOrder;
+import com.example.banhangapi.api.mapper.OrderMapper;
 import com.example.banhangapi.api.service.CartService;
+import com.example.banhangapi.api.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class OrderAndCartRest implements OrderAndCartOperator {
+
     private final CartService cartService;
+    private final OrderService orderService;
+    private final OrderMapper orderMapper;
     @Override
     public ResponseEntity<Object> addNewCart(String productId, int quantity) {
 
@@ -20,5 +31,36 @@ public class OrderAndCartRest implements OrderAndCartOperator {
     @Override
     public ResponseEntity<Object> getCart() {
         return ResponseEntity.ok(cartService.getAllCartOfUser());
+    }
+
+    @Override
+    public ResponseEntity<Object>  updateCart(String productId, int quantity) {
+        try{
+            cartService.updateQuantityProductInCart(productId, quantity);
+            return ResponseEntity.ok().build();
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> deleteCart(String cartId) {
+        cartService.removeCart(cartId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Object> createOrder(String cartId, String addressUserId) {
+        orderService.createNewOrder(cartId, addressUserId);
+        return ResponseEntity.ok("Success");
+    }
+
+    @Override
+    public ResponseEntity<?> getOrderByStatus(String orderStatus) {
+        Integer statusI = Integer.valueOf(orderStatus);
+        StatusOrder status = StatusOrder.fromInt(statusI);
+        List<Order> listOrder =orderService.getOrderStatusForUser(status);
+        return ResponseEntity.ok(listOrder.stream().map(orderMapper::toOrderDTPDTOList));
     }
 }

@@ -1,21 +1,23 @@
 package com.example.banhangapi.api.service.implement;
 
+import com.example.banhangapi.api.dto.CategoryResponseDTO;
 import com.example.banhangapi.api.dto.ImageResponseDTO;
 import com.example.banhangapi.api.dto.ProductDTO;
 import com.example.banhangapi.api.entity.Category;
 import com.example.banhangapi.api.entity.Image;
 import com.example.banhangapi.api.entity.ProductEntity;
+import com.example.banhangapi.api.mapper.CategoryMapper;
 import com.example.banhangapi.api.mapper.ImageMapper;
 import com.example.banhangapi.api.mapper.ProductMapper;
 import com.example.banhangapi.api.repository.CategoryRepository;
 import com.example.banhangapi.api.repository.ImageRepository;
 import com.example.banhangapi.api.repository.ProductRepository;
+import com.example.banhangapi.api.repository.ProductSpecification;
 import com.example.banhangapi.api.request.CategoryRequest;
 import com.example.banhangapi.api.request.RequestCreateProduct;
 import com.example.banhangapi.api.request.RequestSearchProduct;
 import com.example.banhangapi.api.service.ImageService;
 import com.example.banhangapi.api.service.ProductService;
-import com.example.banhangapi.grpc.GrpcClientService;
 import com.example.banhangapi.helper.handleException.ProductNotFoundException;
 import com.example.banhangapi.kafka.MessageProducer;
 import com.example.banhangapi.redis.RedisServiceImpl;
@@ -26,12 +28,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -52,7 +54,6 @@ public class ProductServiceImple implements ProductService {
 
     final MessageProducer messageProducer;
 
-    final GrpcClientService grpcClientService;
 
     final ProductMapper productMapper;
 
@@ -60,6 +61,7 @@ public class ProductServiceImple implements ProductService {
     final ImageMapper imageMapper;
     private final ImageRepository imageRepository;
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Transactional
     public ResponseEntity<?> createNewProduct(RequestCreateProduct dataCreateNewProduct) {
@@ -76,10 +78,11 @@ public class ProductServiceImple implements ProductService {
        }
     }
 
-    public Page<ProductDTO> getListProduct(int page, int size) {
+    public Page<ProductDTO> getListProduct(int page, int size, Long minPrice, Long maxPrice, Integer rating, String categoryId, String nameProduct) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Page<ProductEntity> products = productRepository.findAll(pageable);
+            Specification<ProductEntity> spec = ProductSpecification.searchProducts( minPrice, maxPrice, categoryId, rating, nameProduct);
+            Page<ProductEntity> products = productRepository.findAll(spec, pageable);
             return new PageImpl<>(
                     products.stream()
                             .map(productMapper::toProductDTO)
@@ -143,18 +146,7 @@ public class ProductServiceImple implements ProductService {
     }
 
 
-    public List<ProductEntity> searchProduct(RequestSearchProduct requestSearchProduct) {
-        List<ProductEntity> productList = List.of();
-        try{
-            ObjectMapper objectMapper = new ObjectMapper();
-            String requestJson = objectMapper.writeValueAsString(requestSearchProduct);
-            productList = grpcClientService.searchProduct(requestJson);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        return productList;
-    }
+
     @Override
     @SneakyThrows
     public String uploadImageForProduct(MultipartFile file, String id, boolean isDefault){
@@ -192,5 +184,10 @@ public class ProductServiceImple implements ProductService {
     public List<ProductDTO> getListProductByCategory(String categoryID){
         Category category = categoryRepository.findById(categoryID).orElseThrow(()->new RuntimeException("Category not found"));
         return productRepository.findAllByCategory(category).stream().map(productMapper::toProductDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CategoryResponseDTO> getListCategory() {
+        return categoryRepository.findAll().stream().map(categoryMapper::categoryToCategoryResponseDTO).toList();
     }
 }

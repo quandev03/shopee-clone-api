@@ -1,5 +1,7 @@
 package com.example.banhangapi.api.service.implement;
 
+import com.example.banhangapi.api.dto.AddressDTO;
+import com.example.banhangapi.api.dto.AddressDTO2;
 import com.example.banhangapi.api.dto.MyAddressDto;
 import com.example.banhangapi.api.entity.Address;
 import com.example.banhangapi.api.entity.AddressUser;
@@ -13,6 +15,7 @@ import com.example.banhangapi.api.repository.UserRepository;
 import com.example.banhangapi.api.request.AddressRequest;
 import com.example.banhangapi.api.request.MyAddressRequest;
 import com.example.banhangapi.api.service.AddressService;
+import jakarta.persistence.Tuple;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,64 +74,76 @@ public class AddressServiceImpl implements AddressService {
         List<MyAddressDto> myAddressDtoList;
         myAddressDtoList = new ArrayList<>();
 
-
         return myAddressDtoList;
-    };
+    }
     @Override
     @SneakyThrows
-    public void removeMyAddress(String idMyAddress){
-        AddressUser address = myAddressRepository.findById(idMyAddress).orElseThrow(()->new RuntimeException("No such address"));
+    public void removeMyAddress(String id){
+        AddressUser address = myAddressRepository.findById(id).orElseThrow(()->new RuntimeException("No such address"));
         myAddressRepository.delete(address);
-    };
+    }
     @Override
     @SneakyThrows
+    @Transactional
     public AddressUser addMyAddress(MyAddressRequest myAddress){
-        Address province = addressRepository.findById(myAddress.getProvincialAddress()).orElseThrow(()->new RuntimeException("No such address"));
-        Address district = addressRepository.findById(myAddress.getDistrictId()).orElseThrow(()->new RuntimeException("No such address"));
-        Address commercal = addressRepository.findById(myAddress.getCommercalAddress()).orElseThrow(()-> new RuntimeException("No such address"));
-        Address specail= null;
-        Address detailAddress = null;
-        if(myAddress.getSpecailAddress() != null){
-            specail = addressRepository.findById(myAddress.getSpecailAddress()).orElse(null);
-            if(specail==null){
-                AddressRequest newSpecailAddress = new AddressRequest(myAddress.getSpecailAddress(), AddressLever.SPECIAL, myAddress.getCommercalAddress());
-                addDetailAddress(newSpecailAddress);
-            }
+        try{
+            log.info("Step 2: get data new address");
+            Address province = addressRepository.findById(myAddress.getProvincialAddress()).orElseThrow(()->new RuntimeException("No such address"));
+            Address district = addressRepository.findById(myAddress.getDistrictId()).orElseThrow(()->new RuntimeException("No such address"));
+            Address commercal = addressRepository.findById(myAddress.getCommercalAddress()).orElseThrow(()-> new RuntimeException("No such address"));
+            Address specail= null;
+            if(myAddress.getSpecailAddress() != null){
+                specail = addressRepository.findById(myAddress.getSpecailAddress()).orElse(null);
+                if(specail==null){
+                    AddressRequest newSpecailAddress = new AddressRequest(myAddress.getSpecailAddress(), AddressLever.SPECIAL, myAddress.getCommercalAddress());
+                    addDetailAddress(newSpecailAddress);
+                }
 
-        }
-        if(myAddress.getDetailAddress() != null){
-            detailAddress = addressRepository.findById(myAddress.getDetailAddress()).orElse(null);
-            if(specail==null){
-                AddressRequest newDetailAddress = new AddressRequest(myAddress.getSpecailAddress(), AddressLever.OTHER, myAddress.getCommercalAddress());
-                addDetailAddress(newDetailAddress);
             }
-        }
-        AddressUser addressUser = new AddressUser();
-        addressUser.setProvincialAddress(province);
-        addressUser.setDistrictAddress(district);
-        addressUser.setCommercalAddress(commercal);
-        addressUser.setSpecailAddress(specail);
-        addressUser.setDetailAddress(detailAddress);
-        addressUser.setNumberPhone(myAddress.getNumberPhone());
-        return myAddressRepository.save(addressUser);
-    };
-    public void updateMyAddress(String idMyAddress){
+            AddressUser addressUser = new AddressUser();
+            addressUser.setProvincialAddress(province);
+            addressUser.setDistrictAddress(district);
+            addressUser.setCommercalAddress(commercal);
+            addressUser.setSpecailAddress(specail);
+            addressUser.setDetailAddress(myAddress.getDetailAddress());
+            addressUser.setPhone(myAddress.getPhone());
+            addressUser.setFullName(myAddress.getFullName());
+            addressUser.setDefaultAddress(myAddress.isDefaultAddress());
+            return myAddressRepository.save(addressUser);
+        } catch (Exception e) {
 
-    };
+            throw new RuntimeException(e);
+        }
+    }
+    public void updateMyAddress(String idMyAddress, MyAddressRequest myAddress){
+        AddressUser addressUser = myAddressRepository.findById(idMyAddress).orElseThrow(()->new RuntimeException("No such address"));
+        addressUser.setDefaultAddress(myAddress.isDefaultAddress());
+        addressUser.setFullName(myAddress.getFullName());
+        addressUser.setPhone(myAddress.getPhone());
+        Address addressCom = addressRepository.findById(myAddress.getCommercalAddress()).orElseThrow(()->new RuntimeException("No such address"));
+        addressUser.setCommercalAddress(addressCom);
+        addressUser.setDetailAddress(myAddress.getDetailAddress());
+        Address addressPro = addressRepository.findById(myAddress.getDistrictId()).orElseThrow(()->new RuntimeException("No such address"));
+        Address addressDis = addressRepository.findById(myAddress.getProvincialAddress()).orElseThrow(()->new RuntimeException("No such address"));
+        addressUser.setDistrictAddress(addressDis);
+        addressUser.setPhone(myAddress.getPhone());
+        addressUser.setProvincialAddress(addressPro);
+        myAddressRepository.save(addressUser);
+    }
 
     @Override
     @Transactional(readOnly = true)
     @SneakyThrows
-    public List<Address> getListProvince(){
-        return addressRepository.findAllByAddressLevel(AddressLever.PROVINCIAL);
-    };
+    public List<AddressDTO> getListProvince(){
+        return addressRepository.findAllByAddressLevel(AddressLever.PROVINCIAL).stream().map(addressMapper::toAddressDTO).toList();
+    }
     @Override
     @Transactional(readOnly = true)
     @SneakyThrows
-    public List<Address> getListNextLevel(String province){
-        Address provinceAddress = addressRepository.findById(province).orElseThrow(()->new RuntimeException("No such address"));
-        return addressRepository.findAllByBeforeLevel(provinceAddress);
-    };
+    public List<AddressDTO> getListNextLevel(String beforeLevel){
+        Address address = addressRepository.findById(beforeLevel).orElseThrow(()->new RuntimeException("No such address"));
+        return addressRepository.findAllByBeforeLevel(address).stream().map(addressMapper::toAddressDTO).toList();
+    }
 
     @Override
     @SneakyThrows
@@ -155,16 +170,6 @@ public class AddressServiceImpl implements AddressService {
         return myAddressDtoList;
     }
     private MyAddressDto convertMyAddress(AddressUser addressUser){
-       String address = "";
-       if(addressUser.getDetailAddress() != null){
-           address+=addressUser.getDetailAddress();
-       }
-       if(addressUser.getSpecailAddress() != null){
-           address+= ", " + addressUser.getSpecailAddress();
-       }
-       address+=", " + addressUser.getCommercalAddress();
-       address+=", " + addressUser.getDistrictAddress();
-       address+=", " + addressUser.getProvincialAddress();
-        return new MyAddressDto(addressUser.getId(), address, addressUser.getNumberPhone());
+        return new MyAddressDto(addressUser.getId(),addressUser.getProvincialAddress().getNameAddress(), addressUser.getDistrictAddress().getNameAddress(), addressUser.getCommercalAddress().getNameAddress(), "", addressUser.getPhone(), addressUser.getFullName(), false );
     }
 }

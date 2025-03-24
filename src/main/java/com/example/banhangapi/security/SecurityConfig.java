@@ -44,7 +44,9 @@ public class SecurityConfig {
                                         "api-admin-manager/get-data-voucher", "api-admin-manager/get-list-voucher-can-apply", "product/get-list-category"
                                 ).permitAll()
                                 .requestMatchers("auth/search","auth/user", "auth/update", "auth/reset-password", "comment/delete-comment", "comment/add-comment", "comment/edit-comment",
-                                        "address-manage/add-new-my-address", "/cart-order/add-product-in-cart", "cart-order/get-data-cart"
+                                        "address-manage/add-new-my-address", "/cart-order/add-product-in-cart", "cart-order/get-data-cart", "product/get-data-cart",
+                                        "/cart-order/update-cart", "cart-order/remove-cart", "/cart-order/create-order", "/address-manage/update-my-address", "/auth/info-me", "/auth/update-avatar",
+                                        "/cart-order/get-order-by-status"
                                 ).authenticated()
                                 .requestMatchers(
                                         "/product/create",

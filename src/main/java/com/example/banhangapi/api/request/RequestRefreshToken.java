@@ -7,6 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RequestRefreshToken {
-    private String username;
     private String refreshToken;
 }

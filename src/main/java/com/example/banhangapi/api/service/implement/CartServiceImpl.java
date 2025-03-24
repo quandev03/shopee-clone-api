@@ -9,8 +9,10 @@ import com.example.banhangapi.api.repository.CartRepository;
 import com.example.banhangapi.api.repository.ProductRepository;
 import com.example.banhangapi.api.repository.UserRepository;
 import com.example.banhangapi.api.service.CartService;
+import com.example.banhangapi.api.service.UserService;
 import com.example.banhangapi.helper.handleException.ProductNotFoundException;
 import com.example.banhangapi.helper.handleException.UserNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
@@ -37,6 +39,9 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private CartMapper cartMapper;
 
+    @Autowired
+    private UserServiceImple userService;
+
     @Override
     @SneakyThrows
     public Cart addCart(String productId, int quantity){
@@ -48,7 +53,6 @@ public class CartServiceImpl implements CartService {
         Cart newCart = Cart.builder()
                 .product(product)
                 .quantityBuy(quantity)
-                .totalPrice( Double.valueOf (quantity*product.getPrice()))
                 .build();
         return cartRepository.save(newCart);
     };
@@ -67,16 +71,13 @@ public class CartServiceImpl implements CartService {
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow(()-> new UserNotFoundException("User not found"));
         return cartRepository.findByCreatedBy(user)
                 .stream()
-                .map(cart -> cartMapper.toCartResponseDTO(cart)) // Sử dụng cartMapper để chuyển đổi từ Cart sang CartResponseDTO
-                .collect(Collectors.toList());
-    };
+                .map(cartMapper::toCartResponseDTO) // Sử dụng cartMapper để chuyển đổi từ Cart sang CartResponseDTO
+                .toList();
+    }
 
-    @Override
-    @SneakyThrows
-    public void updateQuantityProductInCart(String cartId, int quantity){
-        Cart cart = cartRepository.findById(cartId).orElseThrow(()->new ProductNotFoundException("Not found Product in cart"));
-        cart.setQuantityBuy(cart.getQuantityBuy()+quantity);
-        cart.setTotalPrice(Double.valueOf (cart.getQuantityBuy()*cart.getProduct().getPrice()));
-        cartRepository.save(cart);
-    };
+    @Transactional
+    public String updateQuantityProductInCart(String cartId, int quantity) {
+        cartRepository.updateCart(cartId, quantity);
+        return "Success";
+    }
 }

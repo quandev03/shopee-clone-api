@@ -46,7 +46,7 @@ public class CommentServiceImple implements CommentService {
             ProductEntity product = this.productRepository.findById(idProduct).get();
             Comment newComment = new Comment().builder()
                     .content(comment.getContent())
-                    .createBy(user)
+//                    .createBy(user)
                     .product(product)
                     .build();
             commentRepository.save(newComment);
@@ -57,35 +57,37 @@ public class CommentServiceImple implements CommentService {
     }
 
     public ResponseEntity<?> editComment(RequestAddComment contentEdit, String idComment) {
-        try {
-            Comment comment = commentRepository.findById(idComment).orElseThrow(() -> new RuntimeException("Comment not found"));
-                if(comment.getCreateBy().getUsername().equals(SecurityContextHolder.getContext().getAuthentication().getName())) {
-                    comment.setContent(contentEdit.getContent());
-                    commentRepository.save(comment);
-                    return new ResponseEntity<>("Comment successfully edited", HttpStatus.OK);
-                }else {
-                    return new ResponseEntity<>("You are not allowed to edit this comment",HttpStatus.FORBIDDEN);
-                }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Comment comment = commentRepository.findById(idComment).orElseThrow(() -> new RuntimeException("Comment not found"));
+//                if(comment.getCreateBy().getUsername().equals(SecurityContextHolder.getContext().getAuthentication().getName())) {
+//                    comment.setContent(contentEdit.getContent());
+//                    commentRepository.save(comment);
+//                    return new ResponseEntity<>("Comment successfully edited", HttpStatus.OK);
+//                }else {
+//                    return new ResponseEntity<>("You are not allowed to edit this comment",HttpStatus.FORBIDDEN);
+//                }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+        return null;
     }
 
     @Transactional
     public ResponseEntity<?> deleteAComment(String idComment) {
-        try {
-            Comment comment = commentRepository.findById(idComment).orElseThrow(() -> new RuntimeException("Comment not found"));
-            CommentDTO commentDTO = commentMapper.toCommentDTO(comment);
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if( authentication.getAuthorities().toArray()[0].toString().equals("ROLE_ADMIN") ||SecurityContextHolder.getContext().getAuthentication().getName().equals(commentDTO.getCreateBy().getUsername())) {
-                commentRepository.delete(comment);
-                return new ResponseEntity<>("Comment edited successfully",HttpStatus.OK);
-            }else {
-                return new ResponseEntity<>("You are not allowed to delete this comment",HttpStatus.FORBIDDEN);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>("Comment not found", HttpStatus.NOT_FOUND);
-        }
+//        try {
+//            Comment comment = commentRepository.findById(idComment).orElseThrow(() -> new RuntimeException("Comment not found"));
+//            CommentDTO commentDTO = commentMapper.toCommentDTO(comment);
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//            if( authentication.getAuthorities().toArray()[0].toString().equals("ROLE_ADMIN") ||SecurityContextHolder.getContext().getAuthentication().getName().equals(commentDTO.getCreateBy().getUsername())) {
+//                commentRepository.delete(comment);
+//                return new ResponseEntity<>("Comment edited successfully",HttpStatus.OK);
+//            }else {
+//                return new ResponseEntity<>("You are not allowed to delete this comment",HttpStatus.FORBIDDEN);
+//            }
+//        } catch (Exception e) {
+//            return new ResponseEntity<>("Comment not found", HttpStatus.NOT_FOUND);
+//        }
+        return null;
     }
 
     public  ResponseEntity<?> getCommentListCommentOfProduct(Long idProduct, int page, int size){

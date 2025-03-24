@@ -3,7 +3,6 @@ package com.example.banhangapi.api.controller;
 import com.example.banhangapi.api.entity.User;
 import com.example.banhangapi.api.repository.UserRepository;
 import com.example.banhangapi.api.request.*;
-import com.example.banhangapi.api.service.UserService;
 import com.example.banhangapi.api.service.implement.UserServiceImple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/auth")
@@ -31,14 +31,14 @@ public class AuthController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity<Object> register(@RequestBody RequestRegister user) {
-        return ResponseEntity.ok(this.userService.RegisterAccount(user));
+    public ResponseEntity<User> register(@RequestBody RequestRegister user) {
+        return ResponseEntity.ok(this.userService.registerAccount(user));
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> loginAccount(@RequestBody RequestLogin user) {
-        return this.userService.LoginAccount(user);
+        return this.userService.loginAccount(user);
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.PUT)
@@ -48,14 +48,8 @@ public class AuthController {
     }
 
     @RequestMapping(value = "delete", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteUser(@RequestParam Long id) {
+    public ResponseEntity<?> deleteUser(@RequestParam String id) {
         return this.userService.deleteUser(id);
-    }
-
-    @RequestMapping(value = "/search", method = RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> searchUser(@RequestBody RequestSearch requestSearch) {
-        return this.userService.searchUserByUsername(requestSearch);
     }
 
     @RequestMapping(value = "/refresh-token", method = RequestMethod.POST)
@@ -72,8 +66,18 @@ public class AuthController {
 
     @RequestMapping(value = "/info-user", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> infoAccount(@RequestParam Long idUser) {
+    public ResponseEntity<?> infoAccount(@RequestParam String idUser) {
         return this.userService.infoAccount(idUser);
     }
 
+    @GetMapping("/info-me")
+    public ResponseEntity<?> infoMe(){
+        return ResponseEntity.ok(this.userService.infoMe());
+    }
+
+    @PutMapping("/update-avatar")
+    public ResponseEntity<?> updateAvatar( @RequestBody MultipartFile image) {
+        userService.updateAvatar(image);
+        return ResponseEntity.ok("Success");
+    }
 }

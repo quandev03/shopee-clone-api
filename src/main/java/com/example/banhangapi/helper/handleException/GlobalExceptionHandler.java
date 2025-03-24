@@ -1,11 +1,12 @@
 package com.example.banhangapi.helper.handleException;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
@@ -14,8 +15,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.*;
 import org.springframework.dao.DataIntegrityViolationException;
 
-@ControllerAdvice
+@RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    // Phương thức xây dựng ResponseEntity
+    private ResponseEntity<Object> buildResponseEntity2(ApiError apiError) {
+        return new ResponseEntity<>(apiError, apiError.getStatus());
+    }
 
     // Xử lý các ngoại lệ tùy chỉnh
     @ExceptionHandler(DuplicateProductNameException.class)
@@ -55,6 +61,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 ex.getLocalizedMessage(),
                 "An unexpected error occurred."
+        );
+        return buildResponseEntity(apiError);
+    }
+
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex, WebRequest request) {
+        log.error("Expired JWT token --- ", ex);
+        ApiError apiError = new ApiError(
+                HttpStatus.UNAUTHORIZED,
+                "Token has expired",
+                ex.getMessage()
         );
         return buildResponseEntity(apiError);
     }

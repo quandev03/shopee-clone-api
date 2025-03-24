@@ -11,8 +11,6 @@ import lombok.*;
 @Getter
 @Setter
 public class RequestResetPass {
-    @Size(min = 8, max = 255, message = "Invalid password length")
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$", message = "Password is invalid")
     private String oldPassword;
 
     @Size(min = 8, max = 255, message = "Invalid password length")

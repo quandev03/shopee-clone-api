@@ -28,18 +28,16 @@ public class User  implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "createBy", nullable = true)
+    @CreatedBy
+    private User createBy;
     @CreationTimestamp
     private LocalDateTime createTime;
 
     @UpdateTimestamp
     private LocalDateTime updateTime;
 
-    // Thiết lập mối quan hệ Many-to-One tới User
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "create_by", nullable = true)
-    @CreatedBy
-    private User createBy;
 
     @Column(nullable = false, unique = true)
     @Pattern(regexp = "^[a-zA-Z0-9_]{5,20}$", message = "Username is incorrect!")
@@ -67,21 +65,13 @@ public class User  implements Serializable {
     )
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToOne
-    Address addressUser;
+//    @OneToOne
+//    Address addressUser;
 
-//    @OneToMany(
-//            mappedBy = "user",
-//            cascade = CascadeType.ALL,
-//            orphanRemoval = true
-//    )
-//    @JsonIgnore
-//    List<Cart> carts = new ArrayList<>();
-//    public void addCart(Cart cart) {
-//        this.carts.add(cart);
-//    }
-//    public void removeCart(Cart cart) {
-//        this.carts.remove(cart);
-//    }
+    @Column(name = "birthday")
+    private String birthday = "01/01/1990";
 
+    private String avatar;
+    private String fullName;
 }
+

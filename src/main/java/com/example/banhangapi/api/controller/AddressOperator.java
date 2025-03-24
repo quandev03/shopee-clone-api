@@ -13,11 +13,14 @@ public interface AddressOperator {
     @GetMapping("/get-list-province")
     ResponseEntity<Object> getListProvince();
     @GetMapping("get-list-next-level")
-    ResponseEntity<Object> getListNextLever(@RequestParam(value = "next-level") String province);
+    ResponseEntity<Object> getListNextLever(@RequestParam() String beforeLevel);
     @PostMapping("add-new-my-address")
     ResponseEntity<Object> addNewMyAddress(@RequestBody MyAddressRequest address);
-    @GetMapping("get-list-my-address")
+    @GetMapping("get-my-address")
     ResponseEntity<Object> getListMyAddress();
-    @DeleteMapping("delete-mu-address")
+    @DeleteMapping("delete-my-address")
     ResponseEntity<String> deleteMyAddress(@RequestParam(value = "id") String id);
+
+    @PutMapping("update-my-address")
+    ResponseEntity<Object> updateMyAddress(@RequestBody MyAddressRequest address, @RequestParam String addressId);
 }

@@ -7,6 +7,11 @@ import lombok.Data;
 @AllArgsConstructor
 public class MyAddressDto {
     private String id;
-    private String address;
-    private String phoneNumber;
+    private String province;
+    private String district;
+    private String commune;
+    private String detail;
+    private String phone;
+    private String name;
+    private boolean isDefault;
 }

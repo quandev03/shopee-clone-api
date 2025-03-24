@@ -5,11 +5,9 @@ import com.example.banhangapi.api.dto.OrderDetailDTO;
 import com.example.banhangapi.api.entity.*;
 import com.example.banhangapi.api.globalEnum.StatusOrder;
 import com.example.banhangapi.api.mapper.OrderMapper;
-import com.example.banhangapi.api.repository.CartRepository;
-import com.example.banhangapi.api.repository.OrderRepository;
-import com.example.banhangapi.api.repository.ProductRepository;
-import com.example.banhangapi.api.repository.UserRepository;
+import com.example.banhangapi.api.repository.*;
 import com.example.banhangapi.api.service.OrderService;
+import com.example.banhangapi.api.service.UserService;
 import com.example.banhangapi.helper.handleException.ProductNotFoundException;
 import com.example.banhangapi.redis.RedisServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -54,30 +52,32 @@ public class OrderServicerImpl implements OrderService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    MyAddressRepository myAddressRepository;
+    @Autowired
+    UserServiceImple userService;
+
+
 
 
     @Override
     @SneakyThrows
-    public void createNewOrder(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String redisKeyDataReadyBuy = "redis-key-data-ready-buy-user-" + authentication.getName();
-        List<OrderDetails> listOrderDetail;
-        if(redisService.hasKey(redisKeyDataReadyBuy)){
-            Object dataToRedis = redisService.getData(redisKeyDataReadyBuy);
-            listOrderDetail = objectMapper.convertValue(dataToRedis, new TypeReference<List<OrderDetails>>() {});
-        }else{
-            throw new RuntimeException("");
-        }
+    public void createNewOrder(String cartId, String addressUserIdd){
+        Cart cart = cartRepository.findById(cartId).orElseThrow(()-> new ProductNotFoundException("Product not found"));
+        AddressUser addressUser  = myAddressRepository.findById(addressUserIdd).orElseThrow(()-> new ProductNotFoundException("Product not found"));
         Order order = new Order();
-        order.setOrderDetails(listOrderDetail);
         order.setStatusOrder(StatusOrder.ORDER_WAITING_FOR_CONFIRMATION);
-        order.setTotalAmountOrder(sumAmountBill(listOrderDetail));
-        Order Ordered = orderRepository.save(order);
-        listOrderDetail.forEach(orderDetail -> {
-            orderDetail.setOrder(Ordered);
-        });
+        order.setAddressUser(addressUser);
+        order.setProductEntity(cart.getProduct());
+        order.setQuantity( cart.getQuantityBuy());
+        try{
+            orderRepository.save(order);
+        }catch (Exception e){
+            throw new ProductNotFoundException("Product not found");
+        }
+
         log.info("Successfully created new order");
-    };
+    }
     @Override
     @SneakyThrows
     public void userClickBuyNowInHomePage(String productId, int quantity){
@@ -85,7 +85,6 @@ public class OrderServicerImpl implements OrderService {
         ProductEntity newProductEntity = productRepository.findById(productId).orElseThrow();
         newCart.setProduct(newProductEntity);
         newCart.setQuantityBuy(quantity);
-        newCart.setChecked(true);
         cartRepository.save(newCart);
     }
     public Page<Object> getAllOrdersForAdmin(){
@@ -107,25 +106,25 @@ public class OrderServicerImpl implements OrderService {
         return null;
     };
 
-    @Override
-    @SneakyThrows
-    public void readyDataToUserCreateNewOrder(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        String redisKeyDataReadyBuy = "redis-key-data-ready-buy-user-" + authentication.getName();
-        List<Cart> cartList = cartRepository.findAllByCheckedAndCreatedBy(true, user);
-        List<OrderDetails> orderDetails = new ArrayList<>();
-        cartList.forEach(cart -> {
-            OrderDetails orderDetail = new OrderDetails();
-            orderDetail.setProduct(cart.getProduct());
-            orderDetail.setQuantityBuy(cart.getQuantityBuy());
-            orderDetail.setTotalPrice(cart.getTotalPrice());
-            orderDetails.add(orderDetail);
-        });
-        String dataReadyToBuyJson = objectMapper.writeValueAsString(orderDetails);
-        redisService.saveData(redisKeyDataReadyBuy, dataReadyToBuyJson, redisExpireTime);
-        log.info(dataReadyToBuyJson);
-    };
+//    @Override
+//    @SneakyThrows
+//    public void readyDataToUserCreateNewOrder(){
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
+//        String redisKeyDataReadyBuy = "redis-key-data-ready-buy-user-" + authentication.getName();
+//        List<Cart> cartList = cartRepository.findAllByCheckedAndCreatedBy(true, user);
+//        List<OrderDetails> orderDetails = new ArrayList<>();
+//        cartList.forEach(cart -> {
+//            OrderDetails orderDetail = new OrderDetails();
+//            orderDetail.setProduct(cart.getProduct());
+//            orderDetail.setQuantityBuy(cart.getQuantityBuy());
+//            orderDetail.setTotalPrice(cart.getTotalPrice());
+//            orderDetails.add(orderDetail);
+//        });
+//        String dataReadyToBuyJson = objectMapper.writeValueAsString(orderDetails);
+//        redisService.saveData(redisKeyDataReadyBuy, dataReadyToBuyJson, redisExpireTime);
+//        log.info(dataReadyToBuyJson);
+//    };
 
     @Override
     @SneakyThrows
@@ -137,7 +136,6 @@ public class OrderServicerImpl implements OrderService {
         OrderDetails orderDetail = new OrderDetails();
         orderDetail.setProduct(cart.getProduct());
         orderDetail.setQuantityBuy(cart.getQuantityBuy());
-        orderDetail.setTotalPrice(cart.getTotalPrice());
         List<OrderDetails> orderDetailsList;
         if(redisService.hasKey(redisKeyDataReadyBuy)){
             Object dataToRedis = redisService.getData(redisKeyDataReadyBuy);
@@ -206,7 +204,19 @@ public class OrderServicerImpl implements OrderService {
             String dataSentRedis = objectMapper.writeValueAsString(dataReadyToBuyDTO);
             redisService.saveData(redisKeyDataReadyBuy, dataSentRedis, redisExpireTime);
         }
-    };
+    }
+
+    @Override
+    public List<Order> getOrderStatusForUser(StatusOrder statusOrder) {
+        User user = userService.getCurrentUser();
+        if(statusOrder.equals(StatusOrder.ORDER_ALL)) {
+            return orderRepository.findAllByCreatedBy(user);
+        }else {
+            return orderRepository.findAllByStatusOrderAndCreatedBy(statusOrder ,user);
+        }
+    }
+
+    ;
 
     private Long sumAmountBill(List<OrderDetails> orderDetailsList){
         AtomicReference<Long> sumAmount = new AtomicReference<>(0L);

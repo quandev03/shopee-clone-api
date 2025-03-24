@@ -1,5 +1,6 @@
 package com.example.banhangapi.api.service;
 
+import com.example.banhangapi.api.dto.CategoryResponseDTO;
 import com.example.banhangapi.api.dto.ProductDTO;
 import com.example.banhangapi.api.entity.Category;
 import com.example.banhangapi.api.entity.ProductEntity;
@@ -15,7 +16,7 @@ import java.util.List;
 public interface ProductService {
     ResponseEntity<?> createNewProduct(RequestCreateProduct requestCreateProduct);
 
-    Page<ProductDTO> getListProduct(int page, int size);
+    Page<ProductDTO> getListProduct(int page, int size, Long minPrice, Long maxPrice, Integer rating, String categoryId, String nameProduct);
 
     ResponseEntity<?> updateInfoProduct(String id, RequestCreateProduct product);
 
@@ -23,10 +24,9 @@ public interface ProductService {
 
     ProductDTO getDataProduct(String id);
 
-    List<ProductEntity> searchProduct(RequestSearchProduct requestSearchProduct);
-
     String uploadImageForProduct(MultipartFile file, String id, boolean isDefault);
 
     Category createCategory(CategoryRequest categoryRequest);
     List<ProductDTO> getListProductByCategory(String categoryID);
+    List<CategoryResponseDTO> getListCategory();
 }

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,38 +22,20 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@EntityListeners(AuditingEntityListener.class)
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
-
-    @Column(nullable = false)
     String nameAddress;
 
     @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
-    @ToString.Exclude
     Address beforeLevel;
 
     @Column()
     AddressLever addressLevel;
-
-    @OneToMany(
-            mappedBy = "beforeLevel",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    @JsonIgnore
-    List<Address> nextLevel = new ArrayList<>();
-
-    public void addNextLeverAddress(Address address) {
-        nextLevel.add(address);
-    }
-
-    public void removeNextLeverAddress(Address address) {
-        nextLevel.remove(address);
-    };
 
     @CreationTimestamp()
     LocalDateTime createdAt;

@@ -5,9 +5,11 @@ import com.example.banhangapi.api.entity.ProductEntity;
 import com.example.banhangapi.api.request.CategoryRequest;
 import com.example.banhangapi.api.request.RequestCreateProduct;
 import com.example.banhangapi.api.request.RequestSearchProduct;
+import com.example.banhangapi.api.service.CartService;
 import com.example.banhangapi.api.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,10 +24,11 @@ import java.util.List;
 @RequestMapping("/product")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    private final ProductService productService;
+    private final CartService cartService;
 
     @PostMapping("create")
     @ResponseBody
@@ -59,18 +62,16 @@ public class ProductController {
     @RequestMapping(value = "get-list", method = RequestMethod.GET)
     public Object getList(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10", name = "limit") int size,
+            @RequestParam(required = false, name = "priceMin") Long minPrice,
+            @RequestParam(required = false, name = "priceMax") Long maxPrice,
+            @RequestParam(required = false, name = "category") String categoryId,
+            @RequestParam(required = false) Integer rating,
+            @RequestParam(required = false, name = "name") String nameProduct
     ){
-        return this.productService.getListProduct(page, size);
+        return this.productService.getListProduct(page, size, minPrice, maxPrice, rating, categoryId,nameProduct);
     }
 
-    @RequestMapping(value = "search", method = RequestMethod.GET)
-    public List<ProductEntity> search(@RequestParam(required = false) String nameProduce, @RequestParam(required = false) Long minPrice, @RequestParam(required = false) Long maxPrice) {
-        RequestSearchProduct requestSearchProduct = new RequestSearchProduct(
-                nameProduce, minPrice, maxPrice
-        );
-        return this.productService.searchProduct(requestSearchProduct);
-    }
     @PostMapping("upload-image")
     public ResponseEntity<?> uploadImage(@RequestPart MultipartFile file, @RequestParam String productId, @RequestPart() boolean isDefault) {
         return ResponseEntity.ok(productService.uploadImageForProduct(file, productId, isDefault));
@@ -86,6 +87,12 @@ public class ProductController {
     }
     @GetMapping("get-list-category")
     public ResponseEntity<Object> getListCategory(){
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(productService.getListCategory());
     }
+
+    @GetMapping("get-data-cart")
+    public ResponseEntity<Object> getCart(){
+        return ResponseEntity.ok(cartService.getAllCartOfUser());
+    }
+
 }

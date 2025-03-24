@@ -1,4 +1,7 @@
 spring:
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
   application:
     name: ${APP_NAME}
 
@@ -43,3 +46,7 @@ grpc:
       address: ${GRPC_SEARCH_SERVICE_ADDRESS}
       negotiationType: ${GRPC_SEARCH_SERVICE_NEGOTIATION_TYPE}
 
+server:
+  error:
+    include-message: always
+    include-binding-errors: always

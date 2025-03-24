@@ -10,8 +10,8 @@ import org.mapstruct.factory.Mappers;
 public interface CommentMapper {
     CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
 
-    @Mapping(source = "createBy", target = "createBy")
-    CommentDTO toCommentDTO(Comment comment);
+//    @Mapping(source = "createBy", target = "createBy")
+//    CommentDTO toCommentDTO(Comment comment);
 
 //    Comment toComment(CommentDTO commentDTO);
 

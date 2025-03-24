@@ -1,5 +1,6 @@
 package com.example.banhangapi.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddressUser {
     @Id
@@ -40,19 +43,17 @@ public class AddressUser {
     @ManyToOne(fetch = FetchType.LAZY)
     Address specailAddress;
 
-    @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
+    String detailAddress;
 
-    Address detailAddress;
+    String fullName;
+    String phone;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @CreatedBy
+    @CreatedBy()
+    @JsonIgnore
     private User createdBy;
 
-    private boolean isDefault = false;
-
-    @NonNull
-    private String numberPhone;
-
+    private boolean defaultAddress = false;
 
 }

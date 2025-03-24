@@ -1,14 +1,16 @@
 package com.example.banhangapi.api.service.implement;
 
+import com.example.banhangapi.api.dto.InforMeDTO;
+import com.example.banhangapi.api.dto.MyAddressDto;
 import com.example.banhangapi.api.dto.ResponseDto;
 import com.example.banhangapi.api.dto.UserResponseDTO;
 import com.example.banhangapi.api.entity.User;
 import com.example.banhangapi.api.repository.UserRepository;
 import com.example.banhangapi.api.request.*;
-import com.example.banhangapi.api.service.UserService;
+import com.example.banhangapi.api.service.AddressService;
+import com.example.banhangapi.api.service.ImageService;
 import com.example.banhangapi.helper.exception.ResponseValidate;
 import com.example.banhangapi.security.JwtService;
-import com.example.banhangapi.grpc.GrpcClientService;
 import com.example.banhangapi.helper.exception.ValidationUtil;
 import com.example.banhangapi.kafka.MessageProducer;
 import com.example.banhangapi.redis.RedisServiceImpl;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import org.mapstruct.control.MappingControl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,10 +34,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -46,13 +49,16 @@ public class UserServiceImple implements UserDetailsService {
     @Autowired
     MessageProducer massageProducer;
     @Autowired
-    GrpcClientService grpcClientService;
-    @Autowired
     RedisServiceImpl redisService;
     @Autowired
     ModelMapper modelMapper;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    AddressService addressService;
+
+    @Autowired
+    ImageService imageService;
 
 
     public UserDetails loadUserByUsername(String username) {
@@ -65,12 +71,15 @@ public class UserServiceImple implements UserDetailsService {
     }
 
     public User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return userRepository.findByUsername(authentication.getName()).orElseThrow(()->new RuntimeException("You are not logged in, please login first"));
+        // Lấy đối tượng CustomUserDetails từ SecurityContext
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // Trả về đối tượng User từ CustomUserDetails
+        return customUserDetails.getUser();
     }
 
     @SneakyThrows
-    public User RegisterAccount(RequestRegister requestRegister) {
+    public User registerAccount(RequestRegister requestRegister) {
         ResponseValidate responseValidate = new ValidationUtil<RequestRegister>().getMessage( requestRegister);
         if (!responseValidate.isValid()) {
             throw new RuntimeException(responseValidate.getMessages().toString());
@@ -92,7 +101,7 @@ public class UserServiceImple implements UserDetailsService {
         }
     }
 
-    public ResponseEntity<?> LoginAccount (RequestLogin requestLogin) {
+    public ResponseEntity<?> loginAccount(RequestLogin requestLogin) {
         try {
             ResponseValidate responseValidate = new ValidationUtil<RequestLogin>().getMessage( requestLogin);
             if (!responseValidate.isValid()) {
@@ -100,11 +109,13 @@ public class UserServiceImple implements UserDetailsService {
             }
             User user = userRepository.findByUsername(requestLogin.getUsername())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed, Account does not exist"));
+
             if (passwordEncoder.matches(requestLogin.getPassword(), user.getPassword())) {
-                String keyToken = "key_token_"+ user.getUsername();
+//                String keyToken = "key_token_"+ user.getUsername();
                 String refreshToken = jwtService.createRefreshToken(user.getUsername());
-                redisService.saveData(keyToken, refreshToken, 302400100);
-                ResponseDto responseDto = new ResponseDto(user.getUsername(), jwtService.generateToken(user.getUsername()), refreshToken, user.getRoles(), null, user.getId());
+                String accessToken = jwtService.generateToken(user.getUsername());
+//                redisService.saveData(keyToken, refreshToken, 302400100);
+                ResponseDto responseDto = new ResponseDto(user.getUsername(), accessToken, refreshToken, user.getRoles(), null, user.getId());
                 return new ResponseEntity<>(responseDto, HttpStatus.OK);
             }
             else{
@@ -124,8 +135,8 @@ public class UserServiceImple implements UserDetailsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try {
             User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-            user.setAddress(requestUpdate.getAddress());
             user.setPhoneNumber(requestUpdate.getPhone());
+            user.setBirthday(requestUpdate.getBirthday());
             userRepository.save(user);
             massageProducer.sendMessage("update_account", user.getId().toString());
             return new ResponseEntity<>("Update successful", HttpStatus.OK);
@@ -135,7 +146,7 @@ public class UserServiceImple implements UserDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteUser(Long id) {
+    public ResponseEntity<?> deleteUser(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         try{
             userRepository.delete(user);
@@ -145,12 +156,6 @@ public class UserServiceImple implements UserDetailsService {
         }
     }
 
-    public ResponseEntity<?> searchUserByUsername(RequestSearch requestSearch) {
-        return new ResponseEntity<>(
-                parseUserResponseDTOList(grpcClientService.searchUser(requestSearch)),
-                HttpStatus.OK
-        );
-    }
 
     private static List<UserResponseDTO> parseUserResponseDTOList(String input) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -162,16 +167,9 @@ public class UserServiceImple implements UserDetailsService {
 
     }
 
-    public ResponseEntity<?> refreshToken(RequestRefreshToken requestRefreshToken) {
+    public ResponseEntity<String> refreshToken(RequestRefreshToken requestRefreshToken) {
         try{
-            String keyToken = "key_token_"+ requestRefreshToken.getUsername();
-            String refreshToken = (String) this.redisService.getData(keyToken);
-            if (this.jwtService.validateFreshToken(refreshToken ) && refreshToken.equals(requestRefreshToken.getRefreshToken())) {
-                return ResponseEntity.ok(this.jwtService.generateToken(this.jwtService.extractUserName(refreshToken)));
-            }
-            else {
-                return new ResponseEntity<>("Refresh Token invalid",HttpStatus.UNAUTHORIZED);
-            }
+            return ResponseEntity.ok(this.jwtService.generateToken(this.jwtService.extractUserName(requestRefreshToken.getRefreshToken())));
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -185,7 +183,7 @@ public class UserServiceImple implements UserDetailsService {
         }
 
             User user = userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()->new RuntimeException("Not found"));
-            if (passwordEncoder.matches(user.getPassword(), requestResetPass.getOldPassword())) {
+            if (passwordEncoder.matches( requestResetPass.getOldPassword(),user.getPassword())) {
                 if(!requestResetPass.getOldPassword().equals(requestResetPass.getNewPassword())){
                     String password = passwordEncoder.encode(requestResetPass.getNewPassword());
                     user.setPassword(password);
@@ -203,7 +201,7 @@ public class UserServiceImple implements UserDetailsService {
 
     }
 
-    public ResponseEntity<?> infoAccount(Long idUser){
+    public ResponseEntity<?> infoAccount(String idUser){
         try{
             User user = userRepository.findById(idUser).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
             UserResponseDTO userDTO = modelMapper.map(user, UserResponseDTO.class);
@@ -212,4 +210,30 @@ public class UserServiceImple implements UserDetailsService {
             throw new RuntimeException(e);
         }
     }
+    public InforMeDTO infoMe(){
+        InforMeDTO inforMeDTO = new InforMeDTO();
+        User user = getCurrentUser();
+        inforMeDTO.setUsername(user.getUsername());
+        inforMeDTO.setBirthday(user.getBirthday());
+        inforMeDTO.setAvatar(user.getAvatar());
+        inforMeDTO.setId(user.getId());
+        inforMeDTO.setPhone(user.getPhoneNumber());
+        inforMeDTO.setFullName(user.getFullName());
+        inforMeDTO.setAddressList(addressService.getListMyAddressForUser());
+        return inforMeDTO;
+    }
+
+    @Transactional
+
+    public void updateAvatar(MultipartFile avatarFile) {
+        User currentUser = getCurrentUser();
+        ImageServiceImpl.UploadFileDTO avatar = imageService.uploadFile(avatarFile);
+        currentUser.setAvatar(avatar.getFile());
+        try{
+            userRepository.save(currentUser);
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

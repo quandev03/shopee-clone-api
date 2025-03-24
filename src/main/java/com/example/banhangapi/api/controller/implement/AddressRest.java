@@ -25,8 +25,8 @@ public class AddressRest implements AddressOperator {
         return ResponseEntity.ok(addressService.getListProvince());
     }
     @Override
-    public ResponseEntity<Object> getListNextLever(String province){
-        return ResponseEntity.ok(addressService.getListNextLevel(province));
+    public ResponseEntity<Object> getListNextLever(String beforeLevel){
+        return ResponseEntity.ok(addressService.getListNextLevel(beforeLevel));
     }
     @Override
     public ResponseEntity<Object> addNewMyAddress(@RequestBody MyAddressRequest address){
@@ -40,6 +40,12 @@ public class AddressRest implements AddressOperator {
     public ResponseEntity<String> deleteMyAddress(String id){
         addressService.removeMyAddress(id);
         return ResponseEntity.ok("Delete My Address Success");
+    }
+
+    @Override
+    public ResponseEntity<Object> updateMyAddress(MyAddressRequest address, String addressId) {
+        addressService.updateMyAddress(addressId, address);
+        return ResponseEntity.ok("Update My Address Success");
     }
 
 

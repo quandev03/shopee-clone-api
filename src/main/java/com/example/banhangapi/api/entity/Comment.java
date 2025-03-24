@@ -28,11 +28,8 @@ public class Comment  implements Serializable {
     @UpdateTimestamp
     private LocalDateTime updateTime;
 
-    // Thiết lập mối quan hệ Many-to-One tới User
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "createBy", nullable = true)
-    @CreatedBy
-    private User createBy;
+//    // Thiết lập mối quan hệ Many-to-One tới User
+
 
     private String content;
 
@@ -41,4 +38,7 @@ public class Comment  implements Serializable {
     @JoinColumn(name = "product_id")
     private ProductEntity product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID")
+    private User createBy;
 }

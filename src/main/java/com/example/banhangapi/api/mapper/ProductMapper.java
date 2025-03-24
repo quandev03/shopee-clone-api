@@ -12,6 +12,7 @@ public interface ProductMapper {
     ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
     ProductEntity toProduct(ProductDTO productDTO);
     @Mapping(source = "nameProduct", target = "nameProduct")
+    @Mapping(source = "rating", target = "rating")
     ProductDTO toProductDTO(ProductEntity product);
 
     @Mapping(source = "price", target = "price")

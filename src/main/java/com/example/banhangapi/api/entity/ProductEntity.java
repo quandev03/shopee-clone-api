@@ -1,5 +1,6 @@
 package com.example.banhangapi.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -20,6 +22,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class ProductEntity implements Serializable {
 
     @Id
@@ -51,22 +54,12 @@ public class ProductEntity implements Serializable {
 
     private String image;
 
-//
-//    @OneToMany(
-//            mappedBy = "productEntity",
-//            cascade = CascadeType.ALL,
-//            orphanRemoval = true
-//    )
-//    private List<Comment> commentEntities = new ArrayList<>();
-//
-//    public void addComment(Comment commentEntity) {
-//        commentEntities.add(commentEntity);
-//    }
-//
-//    public void removeComment(Comment commentEntity) {
-//        commentEntities.remove(commentEntity);
-//    }
+    @ColumnDefault("0")
+    private Float rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoty_id")
+    @JsonIgnore
     private Category category;
+
 }

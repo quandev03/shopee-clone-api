@@ -4,6 +4,7 @@ import com.example.banhangapi.api.entity.Image;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -23,6 +24,8 @@ public class ProductDTO implements Serializable {
     private List<String> images;
     private String image;
     private CategoryResponseDTO category;
+    private LocalDate createDate;
+    private Integer rating;
 
 
 

@@ -15,7 +15,7 @@ public class RequestUpdate {
     @Pattern(regexp = "^(03|05|07|08|09)[0-9]{8}$", message = "Phone number is incorrect")
     @Size(min = 10, max = 10, message = "Phone number is incorrect")
     private String phone;
+    private String birthday;
 
-    private String address;
 
 }
