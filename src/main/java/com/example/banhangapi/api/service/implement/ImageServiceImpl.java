@@ -23,7 +23,6 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
-    private final AppConfig appConfig;
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final SecureRandom random = new SecureRandom();
     public void getImageReadySave(MultipartFile file){}
@@ -33,7 +32,7 @@ public class ImageServiceImpl implements ImageService {
         Bucket bucket = StorageClient.getInstance().bucket();
         String fileName = UUID.randomUUID().toString();
         Blob blob = bucket.create(fileName, file.getBytes(), file.getContentType());
-        return new UploadFileDTO(fileName, appConfig.getUrlFirebase() + appConfig.getBucketName() + "/o/"
+        return new UploadFileDTO(fileName, "https://firebasestorage.googleapis.com/v0/b/" + "shopee-47645.firebasestorage.app" + "/o/"
                 + blob.getName().replaceAll("/", "%2F") + "?alt=media");
     }
     @Data
