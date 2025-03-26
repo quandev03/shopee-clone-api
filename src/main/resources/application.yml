@@ -24,36 +24,6 @@ spring:
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO}
 
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-
-  kafka:
-    producer:
-      enabled: ${KAFKA_PRODUCER_ENABLED}
-    consumer:
-      enabled: ${KAFKA_CONSUMER_ENABLED}
-    host: ${KAFKA_HOST}
-    port: ${KAFKA_PORT}
-    url: ${KAFKA_URL}
-
-
-  firebase:
-
-
-  fe:
-    baseurl:${URL_FE}
-
-
-
-
-grpc:
-  client:
-    searchService:
-      address: ${GRPC_SEARCH_SERVICE_ADDRESS}
-      negotiationType: ${GRPC_SEARCH_SERVICE_NEGOTIATION_TYPE}
-
 server:
   error:
     include-message: always
