@@ -1,4 +1,12 @@
 spring:
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+    problemdetails:
+      enabled: true
+  main:
+    web-application-type: servlet
   jackson:
     serialization:
       fail-on-empty-beans: false
@@ -50,3 +58,4 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+APP_NAME: Shopee

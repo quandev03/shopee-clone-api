@@ -28,7 +28,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>23</java.version>
+		<java.version>21</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -122,37 +122,12 @@
 			<artifactId>jackson-datatype-hibernate5</artifactId>
 			<version>2.13.3</version> <!-- Đảm bảo phiên bản phù hợp với Jackson của bạn -->
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
-		</dependency>
-		<!-- gRPC Dependencies -->
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-netty</artifactId>
-			<version>1.57.2</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-protobuf</artifactId>
-			<version>1.57.2</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-stub</artifactId>
-			<version>1.57.2</version>
-		</dependency>
 
 		<!-- Protobuf Compiler Plugin -->
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
 			<version>3.23.4</version>
-		</dependency>
-		<dependency>
-			<groupId>net.devh</groupId>
-			<artifactId>grpc-client-spring-boot-starter</artifactId>
-			<version>2.15.0.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.annotation</groupId>
@@ -213,12 +188,32 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<!-- Sử dụng lớp chính của ứng dụng Spring Boot -->
+							<mainClass>org.springframework.boot.loader.JarLauncher</mainClass>
+							<arguments>
+								<!-- Thêm các đối số nếu cần thiết -->
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version> <!-- Bạn có thể chọn phiên bản khác phù hợp -->
 				<configuration>
+					<source>11</source> <!-- Phiên bản JDK mà bạn muốn sử dụng -->
+					<target>11</target> <!-- Phiên bản JDK mà bạn muốn sử dụng -->
 					<annotationProcessorPaths>
-						<source>11</source> <!-- Phiên bản JDK mà bạn muốn sử dụng -->
-						<target>11</target> <!-- Phiên bản JDK mà bạn muốn sử dụng -->
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
@@ -248,26 +243,6 @@
 				<groupId>kr.motd.maven</groupId>
 				<artifactId>os-maven-plugin</artifactId>
 				<version>1.7.0</version>
-			</plugin>
-			<!-- Protobuf Maven Plugin -->
-			<!-- Protobuf Maven Plugin -->
-			<plugin>
-				<groupId>org.xolstice.maven.plugins</groupId>
-				<artifactId>protobuf-maven-plugin</artifactId>
-				<version>0.6.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>compile</goal>
-							<goal>compile-custom</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<protocArtifact>com.google.protobuf:protoc:3.23.4:exe:osx-aarch_64</protocArtifact>
-					<pluginId>grpc-java</pluginId>
-					<pluginArtifact>io.grpc:protoc-gen-grpc-java:1.56.0:exe:osx-aarch_64</pluginArtifact>
-				</configuration>
 			</plugin>
 		</plugins>
 		<extensions>
