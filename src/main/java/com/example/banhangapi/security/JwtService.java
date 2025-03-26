@@ -20,8 +20,6 @@ import java.util.function.Function;
 @Component
 @Slf4j
 public class JwtService {
-    @Autowired
-    private final AppConfig appConfig;
 
     // Thời gian sống của Access Token (1 giờ)
     private final long accessTokenExpiration = 60 * 60 * 1000;
@@ -31,10 +29,8 @@ public class JwtService {
 
     private final Key key;
 
-    public JwtService(AppConfig appConfig) {
-        log.info(appConfig.getJwtSecret());
-        this.appConfig = appConfig;
-        byte[] keyBytes = Decoders.BASE64.decode(appConfig.getJwtSecret());
+    public JwtService() {
+        byte[] keyBytes = Decoders.BASE64.decode("3CD8/0T1pPT4gFJ3Hu8JP8vob7vKEnBLr7q/E/H7bcS9U8GoAHmvF7FN30Fte9/IClz95JZkr8y8Pxq21D+ETw==");
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
