@@ -217,6 +217,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<annotationProcessorPaths>
+						<source>11</source> <!-- Phiên bản JDK mà bạn muốn sử dụng -->
+						<target>11</target> <!-- Phiên bản JDK mà bạn muốn sử dụng -->
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
