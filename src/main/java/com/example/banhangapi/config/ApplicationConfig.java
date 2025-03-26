@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -33,13 +34,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final AppConfig appConfig;
 
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, appConfig.getUrlKafka());
-        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, appConfig.getGroupKafka());
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "34.123.186.239:9093");
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "techmaster");
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         return new DefaultKafkaConsumerFactory<>(configProps);
@@ -55,7 +55,7 @@ public class ApplicationConfig {
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, appConfig.getUrlKafka());
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "34.123.186.239:9093");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
@@ -68,7 +68,7 @@ public class ApplicationConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(appConfig.getHost(), appConfig.getRedisPort());
+        return new LettuceConnectionFactory("localhost", 6379);
     }
 
     @Bean
