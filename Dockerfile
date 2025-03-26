@@ -1,26 +1,30 @@
-# Bước 1: Sử dụng Maven để build ứng dụng
-FROM maven:3.8-openjdk-17-slim AS build
+# Bước 1: Tạo image build
+FROM maven:3.8.1-openjdk-21-slim AS build
 
-# Đặt thư mục làm việc
+# Cài đặt thư mục làm việc
 WORKDIR /app
 
-# Copy toàn bộ mã nguồn vào trong container
-COPY . .
+# Sao chép pom.xml và tải phụ thuộc
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# Build ứng dụng Spring Boot (war)
-RUN mvn clean install -DskipTests
+# Sao chép mã nguồn
+COPY src /app/src
 
-# Bước 2: Sử dụng image Tomcat để chạy ứng dụng WAR
-FROM tomcat:10-jdk17-openjdk-slim
+# Biên dịch ứng dụng thành file WAR
+RUN mvn clean package -DskipTests
 
-# Đặt thư mục làm việc trong container
-WORKDIR /usr/local/tomcat/webapps
+# Bước 2: Tạo image cuối cùng
+FROM openjdk:21-slim
 
-# Copy file WAR đã build từ bước trước vào thư mục webapps của Tomcat
-COPY --from=build /app/target/banhangapi-0.0.1-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
+# Tạo thư mục trong container
+WORKDIR /app
 
-# Expose cổng mà Tomcat chạy trên đó
+# Sao chép file WAR vào container
+COPY --from=build /app/target/*.war /app/app.war
+
+# Mở cổng 8080
 EXPOSE 8080
 
-# Lệnh để chạy Tomcat
-CMD ["catalina.sh", "run"]
+# Chạy ứng dụng Spring Boot với file WAR
+ENTRYPOINT ["java", "-jar", "/app/app.war"]
