@@ -37,11 +37,11 @@ spring:
     host: ${KAFKA_HOST}
     port: ${KAFKA_PORT}
     url: ${KAFKA_URL}
-    group: ${KAFKA_GROUP}
+
 
   firebase:
-    url: ${URL_FIREBASE}
-    bucketname: ${BUCKET_NAME}
+
+
   fe:
     baseurl:${URL_FE}
 

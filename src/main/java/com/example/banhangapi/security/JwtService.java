@@ -1,6 +1,5 @@
 package com.example.banhangapi.security;
 
-import com.example.banhangapi.config.AppConfig;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

@@ -1,7 +1,6 @@
 package com.example.banhangapi.api.service.implement;
 
 import com.example.banhangapi.api.service.ImageService;
-import com.example.banhangapi.config.AppConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -10,10 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
 import com.google.firebase.cloud.StorageClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
