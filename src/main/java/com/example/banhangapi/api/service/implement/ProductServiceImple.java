@@ -78,10 +78,10 @@ public class ProductServiceImple implements ProductService {
        }
     }
 
-    public Page<ProductDTO> getListProduct(int page, int size, Long minPrice, Long maxPrice, Integer rating, String categoryId, String nameProduct) {
+    public Page<ProductDTO> getListProduct(int page, int size, Long minPrice, Long maxPrice, Integer rating, String categoryId, String nameProduct, String sort) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            Specification<ProductEntity> spec = ProductSpecification.searchProducts( minPrice, maxPrice, categoryId, rating, nameProduct);
+            Specification<ProductEntity> spec = ProductSpecification.searchProducts( minPrice, maxPrice, categoryId, rating, nameProduct, sort);
             Page<ProductEntity> products = productRepository.findAll(spec, pageable);
             return new PageImpl<>(
                     products.stream()

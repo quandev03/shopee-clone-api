@@ -5,9 +5,11 @@ import com.example.banhangapi.api.entity.ProductEntity;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 //import javax.persistence.criteria.*;
 
+@Slf4j
 public class ProductSpecification {
 
     public static Specification<ProductEntity> searchProducts(
@@ -15,7 +17,8 @@ public class ProductSpecification {
             Long maxPrice,
             String categoryId,
             Integer rating,
-            String nameProduct) {
+            String nameProduct,
+            String sort) {
 
         return (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
@@ -39,11 +42,11 @@ public class ProductSpecification {
             }
 
             if (nameProduct != null && !nameProduct.isEmpty()) {
-                predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(root.get("nameProduct"), nameProduct));
+                // Thêm dấu "%" ở đầu và cuối để tìm kiếm chuỗi con trong nameProduct
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(root.get("nameProduct"), "%" + nameProduct + "%"));
             }
-
-            // Add pagination
-            query.orderBy(criteriaBuilder.asc(root.get("nameProduct"))); // Example ordering, you can change it.
+            log.info(sort);
+            assert query != null;
             return predicate;
         };
     }

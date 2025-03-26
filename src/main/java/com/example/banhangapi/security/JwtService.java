@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtService {
     private final AppConfig appConfig;
 
@@ -28,6 +30,7 @@ public class JwtService {
     private final Key key;
 
     public JwtService(AppConfig appConfig) {
+        log.info(appConfig.getJwtSecret());
         this.appConfig = appConfig;
         byte[] keyBytes = Decoders.BASE64.decode(appConfig.getJwtSecret());
         this.key = Keys.hmacShaKeyFor(keyBytes);

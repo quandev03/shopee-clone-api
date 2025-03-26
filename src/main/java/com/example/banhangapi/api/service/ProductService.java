@@ -16,7 +16,7 @@ import java.util.List;
 public interface ProductService {
     ResponseEntity<?> createNewProduct(RequestCreateProduct requestCreateProduct);
 
-    Page<ProductDTO> getListProduct(int page, int size, Long minPrice, Long maxPrice, Integer rating, String categoryId, String nameProduct);
+    Page<ProductDTO> getListProduct(int page, int size, Long minPrice, Long maxPrice, Integer rating, String categoryId, String nameProduct, String sort);
 
     ResponseEntity<?> updateInfoProduct(String id, RequestCreateProduct product);
 
