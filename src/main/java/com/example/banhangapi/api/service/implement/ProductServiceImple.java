@@ -126,9 +126,10 @@ public class ProductServiceImple implements ProductService {
 
     public ProductDTO getDataProduct(String idProduce) {
         try {
-            messageProducer.sendMessage("product-view", idProduce);
                 ProductEntity product = productRepository.findById(idProduce).orElseThrow(()-> new ProductNotFoundException("Product not found"));
                 ProductDTO produceDTO = productMapper.toProductDTO(product);
+                product.setViewedQuantity(product.getViewedQuantity()+1);
+                productRepository.save(product);
                 List<ImageResponseDTO> listImage = imageRepository.findAllByProduct(product).stream().map((imageMapper::toImageResponseDTO)).toList();
                 List<String> images = listImage.stream().map(ImageResponseDTO::getPathImage).toList();
                 produceDTO.setImages(images);

@@ -12,7 +12,7 @@ RUN mvn dependency:go-offline
 COPY src /app/src
 
 # Biên dịch ứng dụng thành file WAR
-RUN mvn clean package -DskipTests
+RUN mvn clean install -DskipTests
 
 # Bước 2: Tạo image chạy ứng dụng với OpenJDK 21
 FROM openjdk:21-slim
