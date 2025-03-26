@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import java.util.function.Function;
 @Component
 @Slf4j
 public class JwtService {
+    @Autowired
     private final AppConfig appConfig;
 
     // Thời gian sống của Access Token (1 giờ)
