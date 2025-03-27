@@ -1,7 +1,6 @@
 package com.example.banhangapi.api.service.implement;
 
 import com.example.banhangapi.api.dto.InforMeDTO;
-import com.example.banhangapi.api.dto.MyAddressDto;
 import com.example.banhangapi.api.dto.ResponseDto;
 import com.example.banhangapi.api.dto.UserResponseDTO;
 import com.example.banhangapi.api.entity.User;
@@ -12,13 +11,11 @@ import com.example.banhangapi.api.service.ImageService;
 import com.example.banhangapi.helper.exception.ResponseValidate;
 import com.example.banhangapi.security.JwtService;
 import com.example.banhangapi.helper.exception.ValidationUtil;
-import com.example.banhangapi.kafka.MessageProducer;
 import com.example.banhangapi.redis.RedisServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import org.mapstruct.control.MappingControl;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -46,8 +43,6 @@ public class UserServiceImple implements UserDetailsService {
     UserRepository userRepository;
     @Autowired
     JwtService jwtService;
-    @Autowired
-    MessageProducer massageProducer;
     @Autowired
     RedisServiceImpl redisService;
     @Autowired
@@ -93,7 +88,6 @@ public class UserServiceImple implements UserDetailsService {
             newUser.setPassword( passwordEncoder.encode(requestRegister.getPassword()));
             try {
                 User user1 = userRepository.save(newUser);
-                massageProducer.sendMessage("create_account", user1.getId().toString());
                 return user1;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -138,7 +132,6 @@ public class UserServiceImple implements UserDetailsService {
             user.setPhoneNumber(requestUpdate.getPhone());
             user.setBirthday(requestUpdate.getBirthday());
             userRepository.save(user);
-            massageProducer.sendMessage("update_account", user.getId().toString());
             return new ResponseEntity<>("Update successful", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Update failed", HttpStatus.UNAUTHORIZED);

@@ -15,13 +15,10 @@ import com.example.banhangapi.api.repository.ProductRepository;
 import com.example.banhangapi.api.repository.ProductSpecification;
 import com.example.banhangapi.api.request.CategoryRequest;
 import com.example.banhangapi.api.request.RequestCreateProduct;
-import com.example.banhangapi.api.request.RequestSearchProduct;
 import com.example.banhangapi.api.service.ImageService;
 import com.example.banhangapi.api.service.ProductService;
 import com.example.banhangapi.helper.handleException.ProductNotFoundException;
-import com.example.banhangapi.kafka.MessageProducer;
 import com.example.banhangapi.redis.RedisServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -52,8 +49,6 @@ public class ProductServiceImple implements ProductService {
 
     final RedisServiceImpl redisService;
 
-    final MessageProducer messageProducer;
-
 
     final ProductMapper productMapper;
 
@@ -70,8 +65,7 @@ public class ProductServiceImple implements ProductService {
                throw new RuntimeException("Loi");
            }
            ProductEntity dataNewProduct = productMapper.ReqToProduct(dataCreateNewProduct);
-           ProductEntity product = this.productRepository.save(dataNewProduct);
-           messageProducer.sendMessage("create_product", dataNewProduct.getId().toString());
+           this.productRepository.save(dataNewProduct);
            return new ResponseEntity<>(dataNewProduct, HttpStatus.CREATED);
        }catch (Exception e){
            throw new RuntimeException();
@@ -116,7 +110,6 @@ public class ProductServiceImple implements ProductService {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             productRepository.deleteById(idProduce);
-            messageProducer.sendMessage("delete_produce", idProduce);
             return new ResponseEntity<>("Delete produce successfully", HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
