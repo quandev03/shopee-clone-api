@@ -10,6 +10,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
+import java.net.DatagramPacket;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,5 +39,5 @@ public class Cart implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     ProductEntity product;
 
-    int quantityBuy;
+    Double quantityBuy;
 }

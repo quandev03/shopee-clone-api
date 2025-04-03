@@ -7,6 +7,7 @@ import com.example.banhangapi.api.entity.Order;
 import com.example.banhangapi.api.entity.ProductEntity;
 import com.example.banhangapi.api.globalEnum.StatusOrder;
 import com.example.banhangapi.api.globalEnum.TypeThisTimeTotalAmount;
+import com.example.banhangapi.api.service.AdminShop;
 import com.example.banhangapi.api.service.ManagerVoucherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminManagerControllerImple implements AdminManagerController {
     private final ManagerVoucherService managerVoucherService;
+    private final AdminShop adminShop;
 
     @Override
     public ResponseEntity<Object> createNewVoucher(RequestCreateVoucherDTO voucher) {
@@ -57,5 +59,12 @@ public class AdminManagerControllerImple implements AdminManagerController {
     @Override
     public ResponseEntity<Page<ProductEntity>> getAllProductModeAdmin(){
         return null;
-    };
+    }
+
+    @Override
+    public ResponseEntity<Object> getDataDashboard() {
+        return ResponseEntity.ok(adminShop.getDashboard());
+    }
+
+    ;
 }

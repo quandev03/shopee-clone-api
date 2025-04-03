@@ -47,6 +47,9 @@ public interface AdminManagerController {
     @GetMapping("get-all-product-mode-admin")
     ResponseEntity<Page<ProductEntity>> getAllProductModeAdmin();
 
+    @GetMapping("get-data-dashboard")
+    ResponseEntity<Object> getDataDashboard();
+
 
 
 }
