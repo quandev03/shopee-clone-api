@@ -20,11 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/product")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@CrossOrigin(origins = "http://0.0.0.0:3000")
 @RequiredArgsConstructor
 public class ProductController {
 
