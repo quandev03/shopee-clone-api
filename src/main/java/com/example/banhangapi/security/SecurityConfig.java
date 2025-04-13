@@ -1,6 +1,5 @@
 package com.example.banhangapi.security;
 
-
 import com.example.banhangapi.api.service.implement.UserServiceImple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,26 +18,21 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-@CrossOrigin
 public class SecurityConfig {
 
     @Autowired
-
     private JwtFilter jwtFilter;
 
     @Bean
     public UserDetailsService userDetailsService() {
         return new UserServiceImple();
     }
-
-
-
-
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -87,13 +81,24 @@ public class SecurityConfig {
         return authenticationProvider;
     }
 
-
     // Defines a PasswordEncoder bean that uses bcrypt hashing by default for password encoding
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOrigin("http://localhost:3000"); // Điều chỉnh nếu frontend chạy ở domain khác
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
+        config.setAllowCredentials(true); // Cho phép sử dụng cookie hoặc Authorization header
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
     // Defines an AuthenticationManager bean to manage authentication processes
     @Bean
