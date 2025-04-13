@@ -8,13 +8,3 @@ services:
       - "8080:8080"
     depends_on:
       - mysql-db
-
-  mysql-db:
-    image: mysql:8
-    container_name: mysql-db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: shopee
-    ports:
-      - "3306:3306"
