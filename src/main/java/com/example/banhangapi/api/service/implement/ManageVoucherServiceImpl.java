@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -41,12 +42,20 @@ public class ManageVoucherServiceImpl implements ManagerVoucherService {
     @Override
     @SneakyThrows
     public VoucherDTO createNewVoucher(RequestCreateVoucherDTO voucher){
-        LocalDate startDate = convertToLocalDate(voucher.getStartDate());
-        LocalDate expireDate = convertToLocalDate(voucher.getExpirationDate());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        LocalDateTime startDate = LocalDateTime.parse(voucher.getStartDate(), formatter);
+        LocalDateTime expireDate =LocalDateTime.parse(voucher.getExpirationDate(), formatter);
         if(startDate.isAfter(expireDate)){
             throw new RuntimeException("exroot");
         }
+
+
         String codeVoucher = voucher.getVoucherCode() != null ? convertToUpperCase(voucher.getVoucherCode()) : generateRandomString();
+
+        if(voucherRepository.existsByVoucherCode(codeVoucher)){
+            throw new RuntimeException("voucher already exist");
+        }
+
         Voucher newVoucher = new Voucher();
         newVoucher.setDescription(voucher.getDescription());
         float discount = ((float) voucher.getDiscount()) / 100;
@@ -54,19 +63,19 @@ public class ManageVoucherServiceImpl implements ManagerVoucherService {
         newVoucher.setDiscount(discount);
         newVoucher.setVoucherCode(codeVoucher);
         newVoucher.setLimitedUsage(voucher.isLimitedUsage());
-        newVoucher.setStartDate(startDate);
-        newVoucher.setExpirationDate(expireDate);
+        newVoucher.setStartDate(voucher.getStartDate());
+        newVoucher.setExpirationDate(voucher.getExpirationDate());
         return  voucherMapper.toVoucherDTO(voucherRepository.save(newVoucher));
 
-    };
+    }
     public VoucherDTO getInfoVoucher(String voucherCode){
         Voucher voucher = voucherRepository.findByVoucherCode(voucherCode).orElseThrow(()->new ProductNotFoundException("Voucher Not Found"));
         VoucherDTO voucherDTO = voucherMapper.toVoucherDTO(voucher);
-        voucherDTO.setRemainingTime(calculateTimeRemaining(voucher.getExpirationDate()));
+        voucherDTO.setRemainingTime(calculateTimeRemaining(convertToLocalDate(voucher.getExpirationDate())));
         return voucherDTO;
     };
     public List<VoucherDTO> getListVoucherHaveSlotLimit(){
-        List<Voucher> vouchers = voucherRepository.findAllByLimitSlotGreaterThan(0);
+        List<Voucher> vouchers = voucherRepository.findAllValidVouchers();
         return vouchers.stream().map(voucherMapper::toVoucherDTO).collect(Collectors.toList());
     };
     public Page<VoucherDTO> getAllVoucher(int page, int size){

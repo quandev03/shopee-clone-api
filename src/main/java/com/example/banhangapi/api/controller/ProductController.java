@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/product")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://0.0.0.0:3000")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -31,15 +32,13 @@ public class ProductController {
     private final CartService cartService;
 
     @PostMapping("create")
-    @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> create(@Valid @RequestBody RequestCreateProduct requestCreateProduct) {
-        return this.productService.createNewProduct(requestCreateProduct);
+    public ResponseEntity<ProductDTO> create(@RequestBody RequestCreateProduct requestCreateProduct) {
+        return ResponseEntity.ok(this.productService.createNewProduct(requestCreateProduct));
     }
 
 
     @RequestMapping(value = "update", method = RequestMethod.PUT)
-    @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> update(@RequestBody RequestCreateProduct product, @RequestParam String id) {
@@ -60,27 +59,29 @@ public class ProductController {
     }
 
     @RequestMapping(value = "get-list", method = RequestMethod.GET)
-    public Object getList(
-            @RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Page<ProductDTO>> getList(
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10", name = "limit") int size,
-            @RequestParam(required = false, name = "priceMin") Long minPrice,
-            @RequestParam(required = false, name = "priceMax") Long maxPrice,
+            @RequestParam(required = false, name = "priceMin") Double minPrice,
+            @RequestParam(required = false, name = "priceMax") Double maxPrice,
             @RequestParam(required = false, name = "category") String categoryId,
-            @RequestParam(required = false) Integer rating,
+            @RequestParam(required = false, name = "rating") Integer rating,
             @RequestParam(required = false, name = "name") String nameProduct,
             @RequestParam(required = false, name = "sort", defaultValue = "name-product") String sort
 
     ){
-        return this.productService.getListProduct(page, size, minPrice, maxPrice, rating, categoryId,nameProduct, sort);
+        return ResponseEntity.ok(this.productService.getListProduct(page, size, minPrice, maxPrice, rating, categoryId,nameProduct, sort));
     }
 
     @PostMapping("upload-image")
-    public ResponseEntity<?> uploadImage(@RequestPart MultipartFile file, @RequestParam String productId, @RequestPart() boolean isDefault) {
+    public ResponseEntity<?> uploadImage(@RequestPart("file") MultipartFile file,
+                                         @RequestParam("productId") String productId,
+                                         @RequestParam("isDefault") Boolean isDefault) {
         return ResponseEntity.ok(productService.uploadImageForProduct(file, productId, isDefault));
     }
 
     @PostMapping("create-new-category")
-    public ResponseEntity<Object> createCategory(CategoryRequest categoryRequest) {
+    public ResponseEntity<Object> createCategory(@RequestBody CategoryRequest categoryRequest) {
         return ResponseEntity.ok(productService.createCategory(categoryRequest));
     }
     @GetMapping("get-list-product-by-category")

@@ -14,9 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface ProductService {
-    ResponseEntity<?> createNewProduct(RequestCreateProduct requestCreateProduct);
+    ProductDTO createNewProduct(RequestCreateProduct requestCreateProduct);
 
-    Page<ProductDTO> getListProduct(int page, int size, Long minPrice, Long maxPrice, Integer rating, String categoryId, String nameProduct, String sort);
+    Page<ProductDTO> getListProduct(int page, int size, Double minPrice, Double maxPrice, Integer rating, String categoryId, String nameProduct, String sort);
 
     ResponseEntity<?> updateInfoProduct(String id, RequestCreateProduct product);
 
@@ -29,4 +29,5 @@ public interface ProductService {
     Category createCategory(CategoryRequest categoryRequest);
     List<ProductDTO> getListProductByCategory(String categoryID);
     List<CategoryResponseDTO> getListCategory();
+    List<ProductDTO> getAllProduct();
 }

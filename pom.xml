@@ -28,7 +28,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -166,12 +166,23 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>6.1.0.Final</version>
+			<version>6.2.3.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy</artifactId>
-			<version>1.10.10</version>
+			<version>1.12.20</version>
+		</dependency>
+		<dependency>
+		<groupId>org.springdoc</groupId>
+		<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+		<version>2.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<repositories>
@@ -198,7 +209,7 @@
 						</goals>
 						<configuration>
 							<!-- Sử dụng lớp chính của ứng dụng Spring Boot -->
-							<mainClass>org.springframework.boot.loader.JarLauncher</mainClass>
+<!--							<mainClass>org.springframework,.boot.loader.JarLauncher</mainClass>-->
 							<arguments>
 								<!-- Thêm các đối số nếu cần thiết -->
 							</arguments>

@@ -15,8 +15,11 @@ public class VoucherDTO {
     float discount;
     String voucherCode;
     String description;
-    LocalDateTime startDate;
-    LocalDateTime expirationDate;
+    String startDate;
+    String expirationDate;
     int limitSlot;
     String remainingTime;
+    String id;
+
+
 }

@@ -46,10 +46,10 @@ public class Voucher {
     int limitSlot;
 
     @Column()
-    LocalDate expirationDate;
+    String expirationDate;
 
     @Column()
-    LocalDate startDate;
+    String startDate;
 
     Boolean limitedUsage;
 

@@ -37,7 +37,7 @@ public class ProductSpecification {
                 predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(categoryJoin.get("id"), categoryId));
             }
 
-            if (rating != null) { // Check if rating is not null
+            if (rating != 6) { // Check if rating is not null
                 predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("rating"), rating));
             }
 

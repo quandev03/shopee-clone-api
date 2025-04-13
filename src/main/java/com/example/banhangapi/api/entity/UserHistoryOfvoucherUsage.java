@@ -1,5 +1,6 @@
 package com.example.banhangapi.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity( name = "user_history_ofvoucher_usage")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +24,8 @@ public class UserHistoryOfvoucherUsage {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     Voucher voucher;
 
     @ManyToOne(fetch = FetchType.LAZY)

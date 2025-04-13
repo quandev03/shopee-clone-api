@@ -71,12 +71,12 @@ public class AuthController {
     }
 
     @GetMapping("/info-me")
-    public ResponseEntity<?> infoMe(){
+    public ResponseEntity<Object> infoMe(){
         return ResponseEntity.ok(this.userService.infoMe());
     }
 
     @PutMapping("/update-avatar")
-    public ResponseEntity<?> updateAvatar( @RequestBody MultipartFile image) {
+    public ResponseEntity<Object> updateAvatar( @RequestBody MultipartFile image) {
         userService.updateAvatar(image);
         return ResponseEntity.ok("Success");
     }

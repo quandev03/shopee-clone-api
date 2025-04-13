@@ -17,6 +17,7 @@ import com.example.banhangapi.api.request.CategoryRequest;
 import com.example.banhangapi.api.request.RequestCreateProduct;
 import com.example.banhangapi.api.service.ImageService;
 import com.example.banhangapi.api.service.ProductService;
+import com.example.banhangapi.helper.exception.ChangeSubscriberInformationErrorKey;
 import com.example.banhangapi.helper.handleException.ProductNotFoundException;
 import com.example.banhangapi.redis.RedisServiceImpl;
 import jakarta.transaction.Transactional;
@@ -49,7 +50,6 @@ public class ProductServiceImple implements ProductService {
 
     final RedisServiceImpl redisService;
 
-
     final ProductMapper productMapper;
 
     final ImageService imageService;
@@ -59,31 +59,28 @@ public class ProductServiceImple implements ProductService {
     private final CategoryMapper categoryMapper;
 
     @Transactional
-    public ResponseEntity<?> createNewProduct(RequestCreateProduct dataCreateNewProduct) {
-       try{
-           if (productRepository.existsByNameProduct(dataCreateNewProduct.getNameProduct())) {
-               throw new RuntimeException("Loi");
-           }
-           ProductEntity dataNewProduct = productMapper.ReqToProduct(dataCreateNewProduct);
-           this.productRepository.save(dataNewProduct);
-           return new ResponseEntity<>(dataNewProduct, HttpStatus.CREATED);
-       }catch (Exception e){
-           throw new RuntimeException();
-       }
+    public ProductDTO createNewProduct(RequestCreateProduct dataCreateNewProduct) {
+        if (productRepository.existsByNameProduct(dataCreateNewProduct.getNameProduct())) {
+            log.error("Sản phẩm đã tồn tại: {}", dataCreateNewProduct.getNameProduct());
+            throw new IllegalArgumentException("Tên sản phẩm đã tồn tại");
+        }
+
+        try {
+            ProductEntity dataNewProduct = productMapper.ReqToProduct(dataCreateNewProduct);
+            ProductEntity savedProduct = productRepository.save(dataNewProduct);
+            return productMapper.toProductDTO(savedProduct);
+        } catch (Exception e) {
+            log.error("Lỗi khi tạo sản phẩm mới: {}", e.getMessage(), e);
+            throw new RuntimeException("Không thể tạo sản phẩm mới, vui lòng thử lại sau");
+        }
     }
 
-    public Page<ProductDTO> getListProduct(int page, int size, Long minPrice, Long maxPrice, Integer rating, String categoryId, String nameProduct, String sort) {
+    public Page<ProductDTO> getListProduct(int page, int size, Double minPrice, Double maxPrice, Integer rating, String categoryId, String nameProduct, String sort) {
         try {
-            Pageable pageable = PageRequest.of(page, size);
-            Specification<ProductEntity> spec = ProductSpecification.searchProducts( minPrice, maxPrice, categoryId, rating, nameProduct, sort);
-            Page<ProductEntity> products = productRepository.findAll(spec, pageable);
-            return new PageImpl<>(
-                    products.stream()
-                            .map(productMapper::toProductDTO)
-                            .collect(Collectors.toList()),
-                    pageable,
-                    size
-            );
+            Pageable pageable = PageRequest.of(page-1, size);
+            Page<ProductEntity> products = productRepository.getAllProductByCondition(minPrice, maxPrice, nameProduct, rating, categoryId, pageable);
+            Page<ProductDTO> productDTOPage = products.map(productMapper::toProductDTO);
+            return productDTOPage;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -119,16 +116,16 @@ public class ProductServiceImple implements ProductService {
 
     public ProductDTO getDataProduct(String idProduce) {
         try {
+            log.info("get data product by idProduce {}", idProduce);
                 ProductEntity product = productRepository.findById(idProduce).orElseThrow(()-> new ProductNotFoundException("Product not found"));
                 ProductDTO produceDTO = productMapper.toProductDTO(product);
-                product.setViewedQuantity(product.getViewedQuantity()+1);
-                productRepository.save(product);
-                List<ImageResponseDTO> listImage = imageRepository.findAllByProduct(product).stream().map((imageMapper::toImageResponseDTO)).toList();
+                productRepository.updateView(idProduce);
+                List<ImageResponseDTO> listImage = imageRepository.findAllByProductAndDefaultImage(product, false).stream().map((imageMapper::toImageResponseDTO)).toList();
                 List<String> images = listImage.stream().map(ImageResponseDTO::getPathImage).toList();
                 produceDTO.setImages(images);
-                produceDTO.setImage(images.getFirst());
                 return produceDTO;
         } catch (Exception e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -152,12 +149,17 @@ public class ProductServiceImple implements ProductService {
             }
         }
 
+
         ImageServiceImpl.UploadFileDTO uploadFileDTO = imageService.uploadFile(file);
         Image image = new Image();
         image.setProduct(product);
         image.setPathImage(uploadFileDTO.getFile());
         image.setDescription("anh san pham");
         image.setDefaultImage(isDefault);
+        if(isDefault){
+            ProductEntity productEntity = productRepository.findById(id).orElseThrow(()-> new ProductNotFoundException("Product not found"));
+            productEntity.setImage(uploadFileDTO.getFile());
+        }
 
         Image image1 = imageRepository.save(image);
         if(isDefault) {
@@ -183,5 +185,10 @@ public class ProductServiceImple implements ProductService {
     @Override
     public List<CategoryResponseDTO> getListCategory() {
         return categoryRepository.findAll().stream().map(categoryMapper::categoryToCategoryResponseDTO).toList();
+    }
+
+    @Override
+    public List<ProductDTO> getAllProduct() {
+        return productRepository.findAll().stream().map(productMapper::toProductDTO).toList();
     }
 }

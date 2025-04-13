@@ -44,7 +44,7 @@ public class ProductEntity implements Serializable {
     private String nameProduct;
 
     private String description;
-    private float price;
+    private Double price;
     private long quantity;
     @Min(value = 0)
     private long soldQuantity;

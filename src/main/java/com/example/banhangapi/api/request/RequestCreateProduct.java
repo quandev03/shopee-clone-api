@@ -11,7 +11,7 @@ public class RequestCreateProduct {
     private String nameProduct;
     private String description;
     @PositiveOrZero(message = "Quantity must be zero or greater")
-    private float price;
+    private Double price;
     @PositiveOrZero(message = "Quantity must be zero or greater")
     private long quantity;
     @PositiveOrZero(message = "Quantity must be zero or greater")

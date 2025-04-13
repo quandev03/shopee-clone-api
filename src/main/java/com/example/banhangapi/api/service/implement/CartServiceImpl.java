@@ -44,7 +44,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @SneakyThrows
-    public Cart addCart(String productId, int quantity){
+    public Cart addCart(String productId, Double quantity){
         ProductEntity product = productRepository.findById(productId).orElseThrow(()-> new ProductNotFoundException("Product not found"));
         User user = userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()-> new UserNotFoundException("User not found"));
         if(cartRepository.existsByProductAndCreatedBy(product, user)){
@@ -76,7 +76,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Transactional
-    public String updateQuantityProductInCart(String cartId, int quantity) {
+    public String updateQuantityProductInCart(String cartId, Double quantity) {
         cartRepository.updateCart(cartId, quantity);
         return "Success";
     }

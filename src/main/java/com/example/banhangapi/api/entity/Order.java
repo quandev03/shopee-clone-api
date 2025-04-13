@@ -3,6 +3,8 @@ package com.example.banhangapi.api.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,10 +42,15 @@ public class Order {
     @CreatedBy()
     User createdBy;
 
-    @Enumerated(EnumType.ORDINAL)
-    StatusOrder statusOrder = StatusOrder.ORDER_WAITING_FOR_CONFIRMATION;
+    @Min(value = 0)
+    @Max(value = 4)
+    Integer statusOrder = 0;
 
-    int quantity;
+    Double quantity;
+
+    float discount = 0;
+
+    String voucherCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -54,5 +61,7 @@ public class Order {
     @JsonIgnore
     AddressUser addressUser;
 
+    @Column(unique = true)
+    String orderCode;
 
 }

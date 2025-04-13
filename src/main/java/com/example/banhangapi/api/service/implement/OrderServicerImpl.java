@@ -1,6 +1,7 @@
 package com.example.banhangapi.api.service.implement;
 
 import com.example.banhangapi.api.dto.DataReadyToBuyDTO;
+import com.example.banhangapi.api.dto.OrderDTP;
 import com.example.banhangapi.api.dto.OrderDetailDTO;
 import com.example.banhangapi.api.entity.*;
 import com.example.banhangapi.api.globalEnum.StatusOrder;
@@ -18,10 +19,13 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -57,19 +61,41 @@ public class OrderServicerImpl implements OrderService {
     @Autowired
     UserServiceImple userService;
 
+    @Autowired
+    VoucherRepository voucherRepository;
+
+    @Autowired
+    UserHistoryOfvoucherUsageRepository voucherUsageRepository;
 
 
 
     @Override
     @SneakyThrows
-    public void createNewOrder(String cartId, String addressUserIdd){
+    public void createNewOrder(String cartId, String addressUserId, String voucherCode){
         Cart cart = cartRepository.findById(cartId).orElseThrow(()-> new ProductNotFoundException("Product not found"));
-        AddressUser addressUser  = myAddressRepository.findById(addressUserIdd).orElseThrow(()-> new ProductNotFoundException("Product not found"));
+        AddressUser addressUser  = myAddressRepository.findById(addressUserId).orElseThrow(()-> new ProductNotFoundException("Product not found"));
+        Voucher voucher;
         Order order = new Order();
-        order.setStatusOrder(StatusOrder.ORDER_WAITING_FOR_CONFIRMATION);
         order.setAddressUser(addressUser);
         order.setProductEntity(cart.getProduct());
         order.setQuantity( cart.getQuantityBuy());
+        order.setOrderCode(genCodeOrder());
+        if(voucherCode!=null){
+            voucher= voucherRepository.findByVoucherCode(voucherCode).orElseThrow(()-> new ProductNotFoundException("Voucher not found"));
+            if (Boolean.TRUE.equals(voucher.getLimitedUsage())){
+                User user = userService.getCurrentUser();
+                int countUse = voucherUsageRepository.countSlotUseVoucherByUser(user.getId(), voucherCode);
+                if(countUse >= voucher.getSlotUsageForUser()){
+                    throw new RuntimeException("Voucher already used");
+                }
+            }
+            order.setVoucherCode(voucher.getVoucherCode());
+            order.setDiscount(voucher.getDiscount());
+            UserHistoryOfvoucherUsage userHistoryOfvoucherUsage = new UserHistoryOfvoucherUsage();
+            userHistoryOfvoucherUsage.setVoucher(voucher);
+            voucherRepository.useVoucher(voucherCode);
+            voucherUsageRepository.save(userHistoryOfvoucherUsage);
+        }
         try{
             orderRepository.save(order);
         }catch (Exception e){
@@ -78,9 +104,13 @@ public class OrderServicerImpl implements OrderService {
 
         log.info("Successfully created new order");
     }
+    private String genCodeOrder(){
+        Integer index = orderRepository.getOrdersCount();
+        return  "HD" + String.format("%04d", index);
+    }
     @Override
     @SneakyThrows
-    public void userClickBuyNowInHomePage(String productId, int quantity){
+    public void userClickBuyNowInHomePage(String productId, Double quantity){
         Cart newCart = new Cart();
         ProductEntity newProductEntity = productRepository.findById(productId).orElseThrow();
         newCart.setProduct(newProductEntity);
@@ -212,7 +242,7 @@ public class OrderServicerImpl implements OrderService {
         if(statusOrder.equals(StatusOrder.ORDER_ALL)) {
             return orderRepository.findAllByCreatedBy(user);
         }else {
-            return orderRepository.findAllByStatusOrderAndCreatedBy(statusOrder ,user);
+            return orderRepository.findAllByStatusOrderAndCreatedBy(statusOrder.ordinal() ,user);
         }
     }
 
@@ -224,5 +254,42 @@ public class OrderServicerImpl implements OrderService {
             sumAmount.updateAndGet(v -> (long) (v + orderDetails.getTotalPrice()));
         });
         return sumAmount.get();
+    }
+    public Page<OrderDTP> getOrderAdmin(Pageable pageable, String dateFrom, String dateTo) {
+        try{
+            LocalDateTime from = null,  to = null;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            if(dateFrom != null && !dateFrom.isEmpty()){
+                from = LocalDateTime.parse(dateFrom, formatter);
+            }
+            if(dateTo != null && !dateTo.isEmpty()){
+                to = LocalDateTime.parse(dateTo, formatter);
+            }
+            Page<Order> orders = orderRepository.findOrdersByCreateTimeRange(from, to, pageable);
+            return orders.map(order -> orderMapper.toOrderDTPDTOList(order));
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public void updateOrderStatus(String orderId, String statusOrderStr) {
+        Integer statusOrder = convertStatus(statusOrderStr).ordinal();
+        orderRepository.updateStatus(orderId, statusOrder);
+    }
+    private StatusOrder convertStatus(String statusOrderStr){
+        switch (statusOrderStr){
+            case "confirmed":
+                return StatusOrder.ORDER_PACKING_GOODS;
+            case "delivered":
+                return StatusOrder.ORDER_SUCCESS;
+            case "cancelled":
+                return StatusOrder.ORDER_CANCEL;
+            case "shipping":
+                return StatusOrder.ORDER_TRANSPORT_GOODS;
+            default:
+                return StatusOrder.ORDER_WAITING_FOR_CONFIRMATION;
+        }
     }
 }

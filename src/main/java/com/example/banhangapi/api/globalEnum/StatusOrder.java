@@ -1,14 +1,12 @@
 package com.example.banhangapi.api.globalEnum;
 
 public enum StatusOrder {
-    ORDER_SUCCESS(0),            // thành công (0)
-    ORDER_FAIL(1),               // thất bại (1)
-    ORDER_CANCEL(2),             // huỷ (2)
-    ORDER_REFUSE(3),             // từ chối (3)
-    ORDER_PACKING_GOODS(4),      // đóng gói (4)
-    ORDER_TRANSPORT_GOODS(5),    // đang vận chuyển (5)
-    ORDER_WAITING_FOR_CONFIRMATION(6), // đợi xác nhận (6)
-    ORDER_ALL(7);                // all (7)
+    ORDER_WAITING_FOR_CONFIRMATION(0), // đợi xác nhận (6)
+    ORDER_PACKING_GOODS(1),      // đóng gói (4)
+    ORDER_TRANSPORT_GOODS(2),    // đang vận chuyển (5)     // all (7)
+    ORDER_SUCCESS(3),            // thành công (0)
+    ORDER_CANCEL(4),
+    ORDER_ALL(5);           // huỷ (2)
 
     private final int value;
 

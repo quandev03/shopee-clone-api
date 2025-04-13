@@ -1,23 +1,31 @@
 package com.example.banhangapi.api.service.implement;
 
-import com.example.banhangapi.api.dto.InforMeDTO;
-import com.example.banhangapi.api.dto.ResponseDto;
-import com.example.banhangapi.api.dto.UserResponseDTO;
+import com.example.banhangapi.api.dto.*;
+import com.example.banhangapi.api.entity.Order;
 import com.example.banhangapi.api.entity.User;
+import com.example.banhangapi.api.globalEnum.ROLES;
+import com.example.banhangapi.api.mapper.OrderMapper;
+import com.example.banhangapi.api.mapper.UserMapper;
+import com.example.banhangapi.api.repository.OrderRepository;
 import com.example.banhangapi.api.repository.UserRepository;
 import com.example.banhangapi.api.request.*;
 import com.example.banhangapi.api.service.AddressService;
 import com.example.banhangapi.api.service.ImageService;
+import com.example.banhangapi.api.service.OrderService;
 import com.example.banhangapi.helper.exception.ResponseValidate;
 import com.example.banhangapi.security.JwtService;
 import com.example.banhangapi.helper.exception.ValidationUtil;
 import com.example.banhangapi.redis.RedisServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,26 +42,31 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserServiceImple implements UserDetailsService {
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
-    JwtService jwtService;
+    private JwtService jwtService;
     @Autowired
-    RedisServiceImpl redisService;
+    private RedisServiceImpl redisService;
     @Autowired
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     @Autowired
-    AddressService addressService;
+    private AddressService addressService;
+    @Autowired
+    private ImageService imageService;
+    @Autowired
+    private UserMapper userMapper;
 
-    @Autowired
-    ImageService imageService;
 
 
     public UserDetails loadUserByUsername(String username) {
@@ -77,11 +90,14 @@ public class UserServiceImple implements UserDetailsService {
     public User registerAccount(RequestRegister requestRegister) {
         ResponseValidate responseValidate = new ValidationUtil<RequestRegister>().getMessage( requestRegister);
         if (!responseValidate.isValid()) {
+            log.error("Lỗi dữ liệu đầu vào");
             throw new RuntimeException(responseValidate.getMessages().toString());
         }
         if (userRepository.existsByUsername(requestRegister.getUsername())) {
+            log.error("Username already exists");
             throw new RuntimeException("Username already exists");
         } else if (userRepository.existsByPhoneNumber(requestRegister.getPhoneNumber())) {
+            log.error("Phone number already exists");
             throw new RuntimeException("Phone number already exists");
         } else {
             User newUser = modelMapper.map(requestRegister, User.class);
@@ -90,6 +106,7 @@ public class UserServiceImple implements UserDetailsService {
                 User user1 = userRepository.save(newUser);
                 return user1;
             } catch (Exception e) {
+                log.error(e.getMessage());
                 throw new RuntimeException(e);
             }
         }
@@ -99,16 +116,15 @@ public class UserServiceImple implements UserDetailsService {
         try {
             ResponseValidate responseValidate = new ValidationUtil<RequestLogin>().getMessage( requestLogin);
             if (!responseValidate.isValid()) {
+                log.error(responseValidate.getMessages().toString());
                 return new ResponseEntity<>(responseValidate.getMessages(), HttpStatus.BAD_REQUEST);
             }
             User user = userRepository.findByUsername(requestLogin.getUsername())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed, Account does not exist"));
 
             if (passwordEncoder.matches(requestLogin.getPassword(), user.getPassword())) {
-//                String keyToken = "key_token_"+ user.getUsername();
                 String refreshToken = jwtService.createRefreshToken(user.getUsername());
                 String accessToken = jwtService.generateToken(user.getUsername());
-//                redisService.saveData(keyToken, refreshToken, 302400100);
                 ResponseDto responseDto = new ResponseDto(user.getUsername(), accessToken, refreshToken, user.getRoles(), null, user.getId());
                 return new ResponseEntity<>(responseDto, HttpStatus.OK);
             }
@@ -116,6 +132,7 @@ public class UserServiceImple implements UserDetailsService {
                 return new ResponseEntity<>("Login failed, Password is incorrect", HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
+            log.error(e.getMessage());
             return new ResponseEntity<>("Login failed, Account does not exist", HttpStatus.UNAUTHORIZED);
         }
     }
@@ -228,5 +245,43 @@ public class UserServiceImple implements UserDetailsService {
             throw new RuntimeException(e);
         }
     }
+
+    public Page<UserAdminDTO> getUserAdmin(Pageable pageable, Boolean active, String username, String fullname, String phone) {
+
+        Page<User> users = userRepository.findAllForAdmin(pageable, active, username, fullname, phone);
+        return users.map(user -> userMapper.toUserAdminDTO(user));
+    }
+
+    public void decentralizationAdmin(String idUser) {
+        User currentUser = getCurrentUser();
+        if(Boolean.FALSE.equals(currentUser.getAdmin())){
+            throw new RuntimeException("Bạn không có quyền quản trị viên");
+        }
+        userRepository.decentralizationAdmin(idUser, ROLES.ROLE_ADMIN);
+
+    }
+    public void decentralizationUser(String idUser) {
+        User currentUser = getCurrentUser();
+        if(Boolean.FALSE.equals(currentUser.getAdmin())){
+            throw new RuntimeException("Bạn không có quyền quản trị viên");
+        }
+        userRepository.decentralizedUser(idUser, ROLES.ROLE_ADMIN);
+    }
+    public void decentralizationCensorship(String idUser) {
+        User currentUser = getCurrentUser();
+        if(Boolean.FALSE.equals(currentUser.getAdmin())){
+            throw new RuntimeException("Bạn không có quyền quản trị viên");
+        }
+        userRepository.decentralizedCensorship(idUser, ROLES.ROLE_ADMIN);
+    }
+    public void lockAndUnlockAccount(String idUser) {
+        User currentUser = getCurrentUser();
+        if(Boolean.FALSE.equals(currentUser.getAdmin())){
+            throw new RuntimeException("Bạn không có quyền quản trị viên");
+        }
+        userRepository.toggleAccountActive(idUser);
+    }
+
+
 
 }

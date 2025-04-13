@@ -29,6 +29,7 @@ public class ImageServiceImpl implements ImageService {
         Bucket bucket = StorageClient.getInstance().bucket();
         String fileName = UUID.randomUUID().toString();
         Blob blob = bucket.create(fileName, file.getBytes(), file.getContentType());
+        blob.createAcl(com.google.cloud.storage.Acl.of(com.google.cloud.storage.Acl.User.ofAllUsers(), com.google.cloud.storage.Acl.Role.READER));
         return new UploadFileDTO(fileName, "https://firebasestorage.googleapis.com/v0/b/" + "shopee-47645.firebasestorage.app" + "/o/"
                 + blob.getName().replaceAll("/", "%2F") + "?alt=media");
     }

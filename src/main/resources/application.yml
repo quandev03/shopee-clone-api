@@ -14,9 +14,9 @@ spring:
     name: ${APP_NAME}
 
   datasource:
-    url: jdbc:mysql://34.123.186.239:3306/shopee
-    username: quandev03
-    password: Ngoquan03
+    url: jdbc:mysql://localhost:3306/shopee
+    username: root
+    password: root
     jwt:
       secret: ${SECRET_KEY}
 
@@ -31,3 +31,6 @@ server:
   address: 0.0.0.0
   port: 8080
 APP_NAME: Shopee
+logging:
+  level:
+    org.springdoc: DEBUG

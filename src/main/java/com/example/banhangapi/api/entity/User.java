@@ -56,6 +56,7 @@ public class User  implements Serializable {
     private String address;
 
     @Column(name = "roles")
+    @Enumerated(EnumType.ORDINAL)
     private ROLES roles = ROLES.ROLE_USER;
 
     @OneToMany(
@@ -73,5 +74,8 @@ public class User  implements Serializable {
 
     private String avatar;
     private String fullName;
+    private  Boolean admin = false;
+    private Boolean active = true;
+    private String lastLogin;
 }
 

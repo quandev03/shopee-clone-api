@@ -1,7 +1,6 @@
 package com.example.banhangapi.api.controller;
 
-import com.example.banhangapi.api.dto.RequestCreateVoucherDTO;
-import com.example.banhangapi.api.dto.VoucherDTO;
+import com.example.banhangapi.api.dto.*;
 import com.example.banhangapi.api.entity.Order;
 import com.example.banhangapi.api.entity.ProductEntity;
 import com.example.banhangapi.api.globalEnum.StatusOrder;
@@ -23,13 +22,13 @@ public interface AdminManagerController {
     @GetMapping("get-all-voucher")
     ResponseEntity<Page<VoucherDTO>> getAllVoucher(
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "20") int limit
+            @RequestParam(required = false, defaultValue = "5") int limit
     );
 
     @GetMapping("get-data-voucher")
     ResponseEntity<Object> getDataVoucher(@RequestParam(value = "code-voucher") String codeVoucher);
-    @PutMapping("admin-change-status-order")
 
+    @PutMapping("admin-change-status-order")
     ResponseEntity<Object> changeStatusOrder(@RequestParam Long id, @RequestParam StatusOrder status);
 
     @GetMapping("admin-get-all-order-follow-status")
@@ -45,11 +44,33 @@ public interface AdminManagerController {
             );
 
     @GetMapping("get-all-product-mode-admin")
-    ResponseEntity<Page<ProductEntity>> getAllProductModeAdmin();
+    ResponseEntity<List<ProductDTO>> getAllProductModeAdmin();
 
     @GetMapping("get-data-dashboard")
     ResponseEntity<Object> getDataDashboard();
 
+    @GetMapping("get-all-user-for-admin")
+    ResponseEntity<Page<UserAdminDTO>> getAllUserForAdmin(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String fullname,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(required = false) String phone
+    );
 
+    @PutMapping("decentralization-admin")
+    void decentralizationAdmin(@RequestParam String id);
+
+    @PutMapping("decentralization-user")
+    void decentralizationUser(@RequestParam String id);
+
+    @PutMapping("decentralization-censorship")
+    void decentralizationCensorship(@RequestParam String id);
+
+    @PutMapping("lock-unlock")
+    void lockUnlockAccount(@RequestParam String id);
+
+    @GetMapping("get-order-admin")
+    ResponseEntity<Object> getOrderAdmin(@RequestParam(value = "dateFrom", required = false) String dateFrom, @RequestParam(value = "dateTo", required = false) String dateTo, @RequestParam(name = "page", required = false, defaultValue = "1") int page);
 
 }

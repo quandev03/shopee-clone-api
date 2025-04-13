@@ -9,9 +9,9 @@ import org.apache.kafka.common.protocol.types.Field;
 import java.util.List;
 
 public interface CartService {
-    Cart addCart(String productId, int quantity);
+    Cart addCart(String productId, Double quantity);
     void removeCart(String cartId);
     List<CartResponseDTO> getAllCartOfUser();
-    String updateQuantityProductInCart(String productId, int quantity);
+    String updateQuantityProductInCart(String productId, Double quantity);
 
 }

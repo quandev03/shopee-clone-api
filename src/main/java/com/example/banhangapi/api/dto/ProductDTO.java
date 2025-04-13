@@ -7,8 +7,6 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,7 +24,4 @@ public class ProductDTO implements Serializable {
     private CategoryResponseDTO category;
     private LocalDate createDate;
     private Integer rating;
-
-
-
 }

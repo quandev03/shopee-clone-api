@@ -24,7 +24,7 @@ public class OrderDetails implements Serializable {
     @ManyToOne
     ProductEntity product;
 
-    Integer quantityBuy;
+    Double quantityBuy;
 
     @Min(value = 1)
     @Max(value = 5)
