@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RequestMapping("address-manage")
+@CrossOrigin(origins = "http://0.0.0.0:3000")
 public interface AddressOperator {
     @PostMapping("add-new-address")//address-manage/add-new-address
     ResponseEntity<Object> addNewAddress(@RequestBody AddressRequest address);

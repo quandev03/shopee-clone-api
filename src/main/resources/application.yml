@@ -14,9 +14,9 @@ spring:
     name: ${APP_NAME}
 
   datasource:
-    url: jdbc:mysql://localhost:3306/shopee
+    url: jdbc:mysql://34.46.178.207:3306/shopee
     username: root
-    password: root
+    password: Ngoquan@2003
     jwt:
       secret: ${SECRET_KEY}
 
