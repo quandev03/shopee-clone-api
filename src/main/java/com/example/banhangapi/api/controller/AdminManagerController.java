@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequestMapping("/api-admin-manager")
-@CrossOrigin("*")
 public interface AdminManagerController {
     @PostMapping("create-new-voucher")
     ResponseEntity<Object> createNewVoucher(@RequestBody RequestCreateVoucherDTO voucher);
