@@ -20,7 +20,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, String>, JpaSp
     List<Voucher> findAllByLimitSlotGreaterThan(@Min(-1) int limitSlotIsGreaterThan);
 
     @Query(value = """
-        SELECT COUNT(*) FROM Voucher v 
+        SELECT COUNT(*) FROM voucher v 
         WHERE v.limit_slot > 0
           AND STR_TO_DATE(v.start_date, 'yyyy-MM-dd hh:mm') < Now()
           AND STR_TO_DATE(v.expiration_date, 'yyyy-MM-dd hh:mm') > Now()
@@ -28,7 +28,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, String>, JpaSp
     Integer countVoucherActive();
 
     @Query(value = """
-        SELECT * FROM Voucher v
+        SELECT * FROM voucher v
             WHERE v.limit_slot > 0
               AND STR_TO_DATE(v.start_date, '%d/%m/%Y %H:%i:%s') < NOW()
               AND STR_TO_DATE(v.expiration_date, '%d/%m/%Y %H:%i:%s') > NOW()
