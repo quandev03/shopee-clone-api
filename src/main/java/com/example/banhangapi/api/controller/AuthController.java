@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin("localhost:3000")
 public class AuthController {
     @Autowired
     UserRepository userRepositoty;
