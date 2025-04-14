@@ -42,6 +42,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -113,7 +114,6 @@ public class UserServiceImple implements UserDetailsService {
     }
 
     public ResponseEntity<?> loginAccount(RequestLogin requestLogin) {
-        try {
             ResponseValidate responseValidate = new ValidationUtil<RequestLogin>().getMessage( requestLogin);
             if (!responseValidate.isValid()) {
                 log.error(responseValidate.getMessages().toString());
@@ -121,20 +121,22 @@ public class UserServiceImple implements UserDetailsService {
             }
             User user = userRepository.findByUsername(requestLogin.getUsername())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed, Account does not exist"));
+            if(Boolean.FALSE.equals(user.getActive())){
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed, Account is blocked");
+            }
 
             if (passwordEncoder.matches(requestLogin.getPassword(), user.getPassword())) {
                 String refreshToken = jwtService.createRefreshToken(user.getUsername());
                 String accessToken = jwtService.generateToken(user.getUsername());
+                String localDateTime = LocalDate.now().toString();
+                user.setLastLogin(localDateTime);
+                userRepository.save(user);
                 ResponseDto responseDto = new ResponseDto(user.getUsername(), accessToken, refreshToken, user.getRoles(), null, user.getId());
                 return new ResponseEntity<>(responseDto, HttpStatus.OK);
             }
             else{
                 return new ResponseEntity<>("Login failed, Password is incorrect", HttpStatus.UNAUTHORIZED);
             }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>("Login failed, Account does not exist", HttpStatus.UNAUTHORIZED);
-        }
     }
 
     @Transactional
