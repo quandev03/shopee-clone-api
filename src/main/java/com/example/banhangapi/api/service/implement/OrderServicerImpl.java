@@ -7,6 +7,7 @@ import com.example.banhangapi.api.entity.*;
 import com.example.banhangapi.api.globalEnum.StatusOrder;
 import com.example.banhangapi.api.mapper.OrderMapper;
 import com.example.banhangapi.api.repository.*;
+import com.example.banhangapi.api.service.CartService;
 import com.example.banhangapi.api.service.OrderService;
 import com.example.banhangapi.api.service.UserService;
 import com.example.banhangapi.helper.handleException.ProductNotFoundException;
@@ -67,6 +68,9 @@ public class OrderServicerImpl implements OrderService {
     @Autowired
     UserHistoryOfvoucherUsageRepository voucherUsageRepository;
 
+    @Autowired
+    CartService cartService;
+
 
 
     @Override
@@ -98,6 +102,7 @@ public class OrderServicerImpl implements OrderService {
         }
         try{
             orderRepository.save(order);
+            cartService.removeCart(cartId);
         }catch (Exception e){
             throw new ProductNotFoundException("Product not found");
         }
