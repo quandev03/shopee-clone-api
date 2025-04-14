@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface ImageRepository extends JpaRepository<Image, String>, JpaSpecificationExecutor<Image> {
     Optional<Image> findByProductAndDefaultImage(ProductEntity product, boolean defaultImage);
 
-    List<Image> findAllByProductAndDefaultImage(ProductEntity product, boolean defaultImage);
+    List<Image> findAllByProduct(ProductEntity product);
 }
