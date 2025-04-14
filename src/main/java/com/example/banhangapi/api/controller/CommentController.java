@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("comment")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@CrossOrigin("localhost:3000")
 public class CommentController {
     @Autowired
     CommentServiceImple commentServiceImple;
