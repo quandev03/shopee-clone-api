@@ -170,6 +170,6 @@ public class AddressServiceImpl implements AddressService {
         return myAddressDtoList;
     }
     private MyAddressDto convertMyAddress(AddressUser addressUser){
-        return new MyAddressDto(addressUser.getId(),addressUser.getProvincialAddress().getNameAddress(), addressUser.getDistrictAddress().getNameAddress(), addressUser.getCommercalAddress().getNameAddress(), "", addressUser.getPhone(), addressUser.getFullName(), false );
+        return new MyAddressDto(addressUser.getId(),addressUser.getProvincialAddress().getNameAddress(), addressUser.getDistrictAddress().getNameAddress(), addressUser.getCommercalAddress().getNameAddress(), addressUser.getDetailAddress(), addressUser.getPhone(), addressUser.getFullName(), false );
     }
 }
