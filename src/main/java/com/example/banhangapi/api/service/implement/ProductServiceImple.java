@@ -67,6 +67,8 @@ public class ProductServiceImple implements ProductService {
 
         try {
             ProductEntity dataNewProduct = productMapper.ReqToProduct(dataCreateNewProduct);
+            Category category = categoryRepository.findById(dataCreateNewProduct.getCategoryId()).orElse(null);
+            dataNewProduct.setCategory(category);
             ProductEntity savedProduct = productRepository.save(dataNewProduct);
             return productMapper.toProductDTO(savedProduct);
         } catch (Exception e) {

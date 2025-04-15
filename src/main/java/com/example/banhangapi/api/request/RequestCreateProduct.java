@@ -1,5 +1,6 @@
 package com.example.banhangapi.api.request;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -16,4 +17,6 @@ public class RequestCreateProduct {
     private long quantity;
     @PositiveOrZero(message = "Quantity must be zero or greater")
     private long soldQuantity = 0;
+    @Nullable
+    private String categoryId;
 }
