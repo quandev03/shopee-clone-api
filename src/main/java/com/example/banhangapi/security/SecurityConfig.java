@@ -83,7 +83,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://34.46.178.207:3000", "http://localhost:3000")); // ✅ frontend IP
+        config.setAllowedOrigins(List.of("http://34.46.178.207:3000", "http://localhost:3000", "https://shopee.quandev03.id.vn")); // ✅ frontend IP
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // nếu bạn dùng cookies, JWT
