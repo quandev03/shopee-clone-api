@@ -75,5 +75,12 @@ public interface ProductRepository  extends JpaRepository<ProductEntity, String>
     """, nativeQuery = true)
     void updateQuantityBuy(@Param("cartId") String cartId);
 
+    @Modifying
+    @Transactional
+    @Query(value = """
+        update products p set p.rating = :rating
+        where p.id = :id
+    """, nativeQuery = true)
+    void updateRating(@Param("id") String id, @Param("rating") Integer rating);
 
 }

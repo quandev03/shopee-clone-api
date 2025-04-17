@@ -28,5 +28,5 @@ public interface OrderAndCartOperator {
     ResponseEntity<Object> changeOrderStatus(@RequestParam("orderStatus") String orderStatus, @RequestParam("orderId") String orderId);
 
     @PutMapping("rate-product")
-    ResponseEntity<Object> rateProduct(@RequestParam("productId") String orderId, @RequestParam("rate") Integer rate);
+    ResponseEntity<Object> rateProduct(@RequestParam("orderId") String orderId, @RequestParam("rate") Integer rate);
 }

@@ -290,6 +290,7 @@ public class OrderServicerImpl implements OrderService {
 
     @Override
     public void rateProduct(String orderId, int rate) {
+
         Order order = orderRepository.findById(orderId).get();
         ProductEntity product = order.getProductEntity();
         int rating;
@@ -299,7 +300,8 @@ public class OrderServicerImpl implements OrderService {
             rating = (int) Math.round((product.getRating() * (product.getSoldQuantity() - order.getQuantity()) + order.getQuantity() * rate) / product.getSoldQuantity());
         }
         product.setRating(rating);
-        productRepository.save(product);
+        log.info("rating: {}", rating);
+        productRepository.updateRating(product.getId(), rating);
 
     }
 
