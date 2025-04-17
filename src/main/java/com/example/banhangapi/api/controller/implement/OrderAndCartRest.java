@@ -77,6 +77,11 @@ public class OrderAndCartRest implements OrderAndCartOperator {
         return ResponseEntity.ok("Success");
     }
 
+    @Override
+    public ResponseEntity<Object> rateProduct(String orderId, Integer rate) {
+        orderService.rateProduct(orderId, rate);
+        return ResponseEntity.ok("Success");
+    }
 
 
 }

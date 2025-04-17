@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
 public class OrderServicerImpl implements OrderService {
+
     long redisExpireTime = 15*60*1000;
 
 
@@ -281,8 +282,28 @@ public class OrderServicerImpl implements OrderService {
     @Override
     public void updateOrderStatus(String orderId, String statusOrderStr) {
         Integer statusOrder = convertStatus(statusOrderStr).ordinal();
+        if(statusOrder.equals(StatusOrder.ORDER_SUCCESS)){
+            productRepository.updateQuantityBuy(orderId);
+        }
         orderRepository.updateStatus(orderId, statusOrder);
     }
+
+    @Override
+    public void rateProduct(String orderId, int rate) {
+        Order order = orderRepository.findById(orderId).get();
+        ProductEntity product = order.getProductEntity();
+        int rating;
+        if (product.getRating() == null){
+            rating = rate;
+        }else{
+            rating = (int) Math.round((product.getRating() * (product.getSoldQuantity() - order.getQuantity()) + order.getQuantity() * rate) / product.getSoldQuantity());
+        }
+        product.setRating(rating);
+        productRepository.save(product);
+
+    }
+
+
     private StatusOrder convertStatus(String statusOrderStr){
         switch (statusOrderStr){
             case "confirmed":

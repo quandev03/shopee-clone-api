@@ -30,4 +30,5 @@ public interface OrderService {
     List<Order> getOrderStatusForUser(StatusOrder statusOrder);
     Page<OrderDTP> getOrderAdmin(Pageable pageable, String dateFrom, String dateTo);
     void updateOrderStatus(String orderId, String statusOrderStr);
+    void rateProduct(String orderId, int rate);
 }

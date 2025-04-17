@@ -55,7 +55,7 @@ public class ProductEntity implements Serializable {
     private String image;
 
     @ColumnDefault("0")
-    private Float rating;
+    private Integer rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoty_id")
