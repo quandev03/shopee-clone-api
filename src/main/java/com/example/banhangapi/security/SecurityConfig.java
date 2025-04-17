@@ -64,7 +64,7 @@ public class SecurityConfig {
                                         "address-manage/add-new-my-address", "/cart-order/add-product-in-cart", "cart-order/get-data-cart", "product/get-data-cart",
                                         "/cart-order/update-cart", "cart-order/remove-cart", "/cart-order/create-order", "/address-manage/update-my-address", "/auth/info-me", "/auth/update-avatar",
                                         "/cart-order/get-order-by-status", "/product/get-list-category",
-                                        "/api-admin-manager/get-list-voucher-can-apply"
+                                        "/api-admin-manager/get-list-voucher-can-apply", "/cart-order/rate-product"
                                 ).authenticated()
                                 .requestMatchers(
                                         "/product/create",
