@@ -1,84 +1,53 @@
 package com.example.banhangapi.api.service.implement;
 
-import com.example.banhangapi.api.dto.DataReadyToBuyDTO;
 import com.example.banhangapi.api.dto.OrderDTP;
-import com.example.banhangapi.api.dto.OrderDetailDTO;
 import com.example.banhangapi.api.entity.*;
 import com.example.banhangapi.api.globalEnum.StatusOrder;
 import com.example.banhangapi.api.mapper.OrderMapper;
 import com.example.banhangapi.api.repository.*;
 import com.example.banhangapi.api.service.CartService;
 import com.example.banhangapi.api.service.OrderService;
-import com.example.banhangapi.api.service.UserService;
 import com.example.banhangapi.helper.handleException.ProductNotFoundException;
 import com.example.banhangapi.redis.RedisServiceImpl;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
+@RequiredArgsConstructor
 public class OrderServicerImpl implements OrderService {
 
-    long redisExpireTime = 15*60*1000;
-
-
-    @Autowired
-    RedisServiceImpl redisService;
-
-    @Autowired
-    OrderRepository orderRepository;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    ProductRepository productRepository;
-
-    @Autowired
-    OrderMapper orderMapper;
-    @Autowired
-    CartRepository cartRepository;
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    MyAddressRepository myAddressRepository;
-    @Autowired
-    UserServiceImple userService;
-
-    @Autowired
-    VoucherRepository voucherRepository;
-
-    @Autowired
-    UserHistoryOfvoucherUsageRepository voucherUsageRepository;
-
-    @Autowired
-    CartService cartService;
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final OrderMapper orderMapper;
+    private final CartRepository cartRepository;
+    private final MyAddressRepository myAddressRepository;
+    private final UserServiceImple userService;
+    private final VoucherRepository voucherRepository;
+    private final UserHistoryOfvoucherUsageRepository voucherUsageRepository;
+    private final CartService cartService;
+    private final HistoryRateRepository historyRateRepository;
 
 
 
     @Override
     @SneakyThrows
     public void createNewOrder(String cartId, String addressUserId, String voucherCode){
-        Cart cart = cartRepository.findById(cartId).orElseThrow(()-> new ProductNotFoundException("Product not found"));
-        AddressUser addressUser  = myAddressRepository.findById(addressUserId).orElseThrow(()-> new ProductNotFoundException("Product not found"));
+        Cart cart = cartRepository.findById(cartId).orElseThrow(()-> new ProductNotFoundException("Không tìm thấy sản phẩm"));
+        AddressUser addressUser  = myAddressRepository.findById(addressUserId).orElseThrow(()-> new ProductNotFoundException("Không tìm thấy địa chỉ"));
         Voucher voucher;
         Order order = new Order();
         order.setAddressUser(addressUser);
@@ -86,12 +55,12 @@ public class OrderServicerImpl implements OrderService {
         order.setQuantity( cart.getQuantityBuy());
         order.setOrderCode(genCodeOrder());
         if(voucherCode!=null){
-            voucher= voucherRepository.findByVoucherCode(voucherCode).orElseThrow(()-> new ProductNotFoundException("Voucher not found"));
+            voucher= voucherRepository.findByVoucherCode(voucherCode).orElseThrow(()-> new ProductNotFoundException("Không tìm thấy voucher"));
             if (Boolean.TRUE.equals(voucher.getLimitedUsage())){
                 User user = userService.getCurrentUser();
                 int countUse = voucherUsageRepository.countSlotUseVoucherByUser(user.getId(), voucherCode);
                 if(countUse >= voucher.getSlotUsageForUser()){
-                    throw new RuntimeException("Voucher already used");
+                    throw new RuntimeException("Mã giảm giá đã được sử dụng");
                 }
             }
             order.setVoucherCode(voucher.getVoucherCode());
@@ -105,141 +74,14 @@ public class OrderServicerImpl implements OrderService {
             orderRepository.save(order);
             cartService.removeCart(cartId);
         }catch (Exception e){
-            throw new ProductNotFoundException("Product not found");
+            throw new ProductNotFoundException("Không tìm thấy sản phẩm");
         }
 
-        log.info("Successfully created new order");
+        log.info("tạo đơn hàng thành công");
     }
     private String genCodeOrder(){
         Integer index = orderRepository.getOrdersCount();
         return  "HD" + String.format("%04d", index);
-    }
-    @Override
-    @SneakyThrows
-    public void userClickBuyNowInHomePage(String productId, Double quantity){
-        Cart newCart = new Cart();
-        ProductEntity newProductEntity = productRepository.findById(productId).orElseThrow();
-        newCart.setProduct(newProductEntity);
-        newCart.setQuantityBuy(quantity);
-        cartRepository.save(newCart);
-    }
-    public Page<Object> getAllOrdersForAdmin(){
-        return null;
-    };
-    public Object getOrderDetailsById(){
-        return null;
-    };
-    public Page<Object> getAllOrdersForUser(){
-        return null;
-    };
-    public Object cancelOrderForAdmin(){
-        return null;
-    };
-    public Object cancelOrderForUser(){
-        return null;
-    };
-    public Object confirmOrderForAdmin(){
-        return null;
-    };
-
-//    @Override
-//    @SneakyThrows
-//    public void readyDataToUserCreateNewOrder(){
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-//        String redisKeyDataReadyBuy = "redis-key-data-ready-buy-user-" + authentication.getName();
-//        List<Cart> cartList = cartRepository.findAllByCheckedAndCreatedBy(true, user);
-//        List<OrderDetails> orderDetails = new ArrayList<>();
-//        cartList.forEach(cart -> {
-//            OrderDetails orderDetail = new OrderDetails();
-//            orderDetail.setProduct(cart.getProduct());
-//            orderDetail.setQuantityBuy(cart.getQuantityBuy());
-//            orderDetail.setTotalPrice(cart.getTotalPrice());
-//            orderDetails.add(orderDetail);
-//        });
-//        String dataReadyToBuyJson = objectMapper.writeValueAsString(orderDetails);
-//        redisService.saveData(redisKeyDataReadyBuy, dataReadyToBuyJson, redisExpireTime);
-//        log.info(dataReadyToBuyJson);
-//    };
-
-    @Override
-    @SneakyThrows
-    public void userChooseProductToBuyInCart(String cartId){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        String redisKeyDataReadyBuy = "redis-key-data-ready-buy-user-" + authentication.getName();
-        Cart cart = cartRepository.findById(cartId).orElseThrow();
-        OrderDetails orderDetail = new OrderDetails();
-        orderDetail.setProduct(cart.getProduct());
-        orderDetail.setQuantityBuy(cart.getQuantityBuy());
-        List<OrderDetails> orderDetailsList;
-        if(redisService.hasKey(redisKeyDataReadyBuy)){
-            Object dataToRedis = redisService.getData(redisKeyDataReadyBuy);
-            orderDetailsList = objectMapper.convertValue(dataToRedis, new TypeReference<List<OrderDetails>>() {});
-        }else {
-            orderDetailsList = new ArrayList<>();
-        }
-        orderDetailsList.add(orderDetail);
-        String dataReadyToBuyJson = objectMapper.writeValueAsString(orderDetailsList);
-        redisService.saveData(redisKeyDataReadyBuy, dataReadyToBuyJson, redisExpireTime);
-        log.info(dataReadyToBuyJson);
-    };
-
-    @Override
-    @SneakyThrows
-    public void unChooseProductInCartToBuy(String productId){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        String redisKeyDataReadyBuy = "redis-key-data-ready-buy-user-" + authentication.getName();
-        List<OrderDetails> orderDetailsList;
-        if(redisService.hasKey(redisKeyDataReadyBuy)){
-            Object dataToRedis = redisService.getData(redisKeyDataReadyBuy);
-            orderDetailsList = objectMapper.convertValue(dataToRedis, new TypeReference<List<OrderDetails>>() {});
-        }else {
-            throw new RuntimeException("Danh sach mua rong");
-        }
-        ProductEntity product = productRepository.findById(productId).orElseThrow();
-        orderDetailsList.removeIf(orderDetail -> orderDetail.getProduct().equals(product));
-        String dataReadyToBuyJson = objectMapper.writeValueAsString(orderDetailsList);
-        redisService.saveData(redisKeyDataReadyBuy, dataReadyToBuyJson, redisExpireTime);
-        log.info(dataReadyToBuyJson);
-
-    };
-
-    public Object userCompleteOrderReceiver(){
-        return null;
-    };
-
-
-    @Override
-    @SneakyThrows
-    public void userClickBuyerNowOrPickInCartToOrder(String productId, int quantity){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String redisKeyDataReadyBuy = "redis-key-data-ready-buy-user-" + authentication.getName();
-        if(redisService.hasKey(redisKeyDataReadyBuy)){
-            Object dataRedis = redisService.getData(redisKeyDataReadyBuy);
-            DataReadyToBuyDTO dataReadyToBuyDTO = objectMapper.convertValue(dataRedis, DataReadyToBuyDTO.class);
-            ProductEntity product = productRepository.findById(productId).orElseThrow(()->new ProductNotFoundException("Not found product " + productId));
-            OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
-            orderDetailDTO.setProduct(product);
-            orderDetailDTO.setQuantityBuy(quantity);
-            orderDetailDTO.setTotalPrice(Double.valueOf(product.getPrice() * quantity));
-            dataReadyToBuyDTO.addProductToBuy(orderDetailDTO);
-
-            String dataSentRedis = objectMapper.writeValueAsString(dataReadyToBuyDTO);
-            redisService.saveData(redisKeyDataReadyBuy, dataSentRedis, redisExpireTime);
-        }
-        else {
-            ProductEntity product = productRepository.findById(productId).orElseThrow(()->new ProductNotFoundException("Not found product " + productId));
-            OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
-            orderDetailDTO.setProduct(product);
-            orderDetailDTO.setQuantityBuy(quantity);
-            orderDetailDTO.setTotalPrice(Double.valueOf(product.getPrice() * quantity));
-            DataReadyToBuyDTO dataReadyToBuyDTO = new DataReadyToBuyDTO();
-            dataReadyToBuyDTO.addProductToBuy(orderDetailDTO);
-            String dataSentRedis = objectMapper.writeValueAsString(dataReadyToBuyDTO);
-            redisService.saveData(redisKeyDataReadyBuy, dataSentRedis, redisExpireTime);
-        }
     }
 
     @Override
@@ -272,7 +114,7 @@ public class OrderServicerImpl implements OrderService {
                 to = LocalDateTime.parse(dateTo, formatter);
             }
             Page<Order> orders = orderRepository.findOrdersByCreateTimeRange(from, to, pageable);
-            return orders.map(order -> orderMapper.toOrderDTPDTOList(order));
+            return orders.map(orderMapper::toOrderDTPDTOList);
         }catch (Exception e){
             log.error(e.getMessage());
             throw e;
@@ -291,13 +133,27 @@ public class OrderServicerImpl implements OrderService {
     @Override
     public void rateProduct(String orderId, int rate) {
 
+
+
         Order order = orderRepository.findById(orderId).get();
         ProductEntity product = order.getProductEntity();
+
+        if (historyRateRepository.checkRateOrder(orderId, order.getCreatedBy().getId()) > 0){
+            throw new RuntimeException("Đơn hàng đã được đáng giá trước đó");
+        }
+
+        HistoryRate historyRate = new HistoryRate();
+        historyRate.setRate(rate);
+        historyRate.setProduct(product);
+        historyRate.setOrderId(order);
+        historyRateRepository.save(historyRate);
+
+
         int rating;
         if (product.getRating() == null){
             rating = rate;
         }else{
-            rating = (int) Math.round((product.getRating() * (product.getSoldQuantity() - order.getQuantity()) + order.getQuantity() * rate) / product.getSoldQuantity());
+            rating = (int) Math.round(historyRateRepository.getRateByProductId(product.getId()));
         }
         product.setRating(rating);
         log.info("rating: {}", rating);
