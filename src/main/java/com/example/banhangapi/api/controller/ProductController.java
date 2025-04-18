@@ -64,7 +64,7 @@ public class ProductController {
             @RequestParam(required = false, name = "priceMax") Double maxPrice,
             @RequestParam(required = false, name = "category") String categoryId,
             @RequestParam(required = false, name = "rating") Integer rating,
-            @RequestParam(required = false, name = "name") String nameProduct,
+            @RequestParam(required = false, name = "nameProduct") String nameProduct,
             @RequestParam(required = false, name = "sort", defaultValue = "name-product") String sort
 
     ){
