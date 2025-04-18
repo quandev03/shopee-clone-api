@@ -46,14 +46,14 @@ public class ManageVoucherServiceImpl implements ManagerVoucherService {
         LocalDateTime startDate = LocalDateTime.parse(voucher.getStartDate(), formatter);
         LocalDateTime expireDate =LocalDateTime.parse(voucher.getExpirationDate(), formatter);
         if(startDate.isAfter(expireDate)){
-            throw new RuntimeException("exroot");
+            throw new RuntimeException("Ngày bắt đầu phải trước ngày kết thúc");
         }
 
 
         String codeVoucher = voucher.getVoucherCode() != null ? convertToUpperCase(voucher.getVoucherCode()) : generateRandomString();
 
         if(voucherRepository.existsByVoucherCode(codeVoucher)){
-            throw new RuntimeException("voucher already exist");
+            throw new RuntimeException("Voucher đã tồn tại");
         }
 
         Voucher newVoucher = new Voucher();
@@ -69,7 +69,7 @@ public class ManageVoucherServiceImpl implements ManagerVoucherService {
 
     }
     public VoucherDTO getInfoVoucher(String voucherCode){
-        Voucher voucher = voucherRepository.findByVoucherCode(voucherCode).orElseThrow(()->new ProductNotFoundException("Voucher Not Found"));
+        Voucher voucher = voucherRepository.findByVoucherCode(voucherCode).orElseThrow(()->new ProductNotFoundException("Không tìm thấy voucher"));
         VoucherDTO voucherDTO = voucherMapper.toVoucherDTO(voucher);
         voucherDTO.setRemainingTime(calculateTimeRemaining(convertToLocalDate(voucher.getExpirationDate())));
         return voucherDTO;
@@ -113,7 +113,7 @@ public class ManageVoucherServiceImpl implements ManagerVoucherService {
     private LocalDate convertToLocalDate(String dateStr) {
         // Định dạng ngày
         if (!isValidDate(dateStr)) {
-            throw new ProductNotFoundException("Date Format Error");
+            throw new ProductNotFoundException("Thời gian không hợp lệ");
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         try {
@@ -121,7 +121,7 @@ public class ManageVoucherServiceImpl implements ManagerVoucherService {
             return LocalDate.parse(dateStr, formatter);
         } catch (DateTimeParseException e) {
             // Xử lý lỗi nếu ngày không hợp lệ
-            System.out.println("Invalid date format: " + dateStr);
+            System.out.println("Định dạng thời gian không hợp lệ: " + dateStr);
             return null;
         }
     }
@@ -135,7 +135,7 @@ public class ManageVoucherServiceImpl implements ManagerVoucherService {
             long hoursRemaining = ChronoUnit.HOURS.between(now, endOfDay);
             long minutesRemaining = ChronoUnit.MINUTES.between(now, endOfDay) % 60;
 
-            return String.format("%d hours, %d minutes.", hoursRemaining, minutesRemaining);
+            return String.format("%d Giờ, %d Phút.", hoursRemaining, minutesRemaining);
         }
 
 
@@ -146,6 +146,6 @@ public class ManageVoucherServiceImpl implements ManagerVoucherService {
         }
 
         // Trả về kết quả dạng chuỗi
-        return String.format("%d days.", daysRemaining);
+        return String.format("%d Ngày.", daysRemaining);
     }
 }

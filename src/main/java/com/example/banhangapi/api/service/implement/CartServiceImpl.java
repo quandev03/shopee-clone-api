@@ -48,7 +48,7 @@ public class CartServiceImpl implements CartService {
         ProductEntity product = productRepository.findById(productId).orElseThrow(()-> new ProductNotFoundException("Product not found"));
         User user = userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(()-> new UserNotFoundException("User not found"));
         if(cartRepository.existsByProductAndCreatedBy(product, user)){
-            throw new RuntimeException("Cart already exists");
+            throw new RuntimeException("Đã tồn tại trong giỏ hàng");
         }
         Cart newCart = Cart.builder()
                 .product(product)
@@ -60,7 +60,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @SneakyThrows
     public void removeCart(String cartId){
-        Cart cartRemove = cartRepository.findById(cartId).orElseThrow(()->new ProductNotFoundException("Not found Product in cart"));
+        Cart cartRemove = cartRepository.findById(cartId).orElseThrow(()->new ProductNotFoundException("Không tìm thấy sản phẩm trong giỏ hàng"));
         cartRepository.delete(cartRemove);
     };
 
@@ -68,7 +68,7 @@ public class CartServiceImpl implements CartService {
     @SneakyThrows
     public List<CartResponseDTO> getAllCartOfUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByUsername(authentication.getName()).orElseThrow(()-> new UserNotFoundException("User not found"));
+        User user = userRepository.findByUsername(authentication.getName()).orElseThrow(()-> new UserNotFoundException("Người dùng không tồn tại"));
         return cartRepository.findByCreatedBy(user)
                 .stream()
                 .map(cartMapper::toCartResponseDTO) // Sử dụng cartMapper để chuyển đổi từ Cart sang CartResponseDTO
@@ -78,6 +78,6 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public String updateQuantityProductInCart(String cartId, Double quantity) {
         cartRepository.updateCart(cartId, quantity);
-        return "Success";
+        return "Thành công";
     }
 }

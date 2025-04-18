@@ -60,7 +60,7 @@ public class OrderAndCartRest implements OrderAndCartOperator {
     @Override
     public ResponseEntity<Object> createOrder(String cartId, String addressUserId, String voucherCode) {
         orderService.createNewOrder(cartId, addressUserId, voucherCode);
-        return ResponseEntity.ok("Success");
+        return ResponseEntity.ok("Thành công");
     }
 
     @Override
@@ -74,13 +74,13 @@ public class OrderAndCartRest implements OrderAndCartOperator {
     @Override
     public ResponseEntity<Object> changeOrderStatus(String orderStatus, String orderId) {
         orderService.updateOrderStatus(orderId, orderStatus);
-        return ResponseEntity.ok("Success");
+        return ResponseEntity.ok("Thành công");
     }
 
     @Override
     public ResponseEntity<Object> rateProduct(String orderId, Integer rate) {
         orderService.rateProduct(orderId, rate);
-        return ResponseEntity.ok("Success");
+        return ResponseEntity.ok("Thành công");
     }
 
 

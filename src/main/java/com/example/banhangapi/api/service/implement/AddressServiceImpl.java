@@ -47,7 +47,7 @@ public class AddressServiceImpl implements AddressService {
     @SneakyThrows
     public Address addAddress(AddressRequest address){
         if(address.getBeforeAddressId().isBlank() && !address.getAddressLevel().equals(AddressLever.PROVINCIAL)){
-            throw new Exception("If address before address lever is provincial");
+            throw new Exception("Bạn đã nhập thiếu địa chỉ trước đó");
         }
         log.info("Step 1: get data new address");
         Address newAddress = addressMapper.toAddress(address);
@@ -69,7 +69,7 @@ public class AddressServiceImpl implements AddressService {
     @SneakyThrows
     public List<MyAddressDto> getAllMyAddress(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new RuntimeException("No Found"));
+        User user = userRepository.findByUsername(authentication.getName()).orElseThrow(()->new RuntimeException("Không tìm thấy"));
         List<AddressUser> listMyAddress = myAddressRepository.findByCreatedBy(user);
         List<MyAddressDto> myAddressDtoList;
         myAddressDtoList = new ArrayList<>();
@@ -79,7 +79,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @SneakyThrows
     public void removeMyAddress(String id){
-        AddressUser address = myAddressRepository.findById(id).orElseThrow(()->new RuntimeException("No such address"));
+        AddressUser address = myAddressRepository.findById(id).orElseThrow(()->new RuntimeException("Không tìm thấy địa "));
         myAddressRepository.delete(address);
     }
     @Override
@@ -88,9 +88,9 @@ public class AddressServiceImpl implements AddressService {
     public AddressUser addMyAddress(MyAddressRequest myAddress){
         try{
             log.info("Step 2: get data new address");
-            Address province = addressRepository.findById(myAddress.getProvincialAddress()).orElseThrow(()->new RuntimeException("No such address"));
-            Address district = addressRepository.findById(myAddress.getDistrictId()).orElseThrow(()->new RuntimeException("No such address"));
-            Address commercal = addressRepository.findById(myAddress.getCommercalAddress()).orElseThrow(()-> new RuntimeException("No such address"));
+            Address province = addressRepository.findById(myAddress.getProvincialAddress()).orElseThrow(()->new RuntimeException("Không tìm thấy địa chỉ"));
+            Address district = addressRepository.findById(myAddress.getDistrictId()).orElseThrow(()->new RuntimeException("Không tìm thấy địa chỉ"));
+            Address commercal = addressRepository.findById(myAddress.getCommercalAddress()).orElseThrow(()-> new RuntimeException("Không tìm thấy địa chỉ"));
             Address specail= null;
             if(myAddress.getSpecailAddress() != null){
                 specail = addressRepository.findById(myAddress.getSpecailAddress()).orElse(null);
@@ -116,15 +116,15 @@ public class AddressServiceImpl implements AddressService {
         }
     }
     public void updateMyAddress(String idMyAddress, MyAddressRequest myAddress){
-        AddressUser addressUser = myAddressRepository.findById(idMyAddress).orElseThrow(()->new RuntimeException("No such address"));
+        AddressUser addressUser = myAddressRepository.findById(idMyAddress).orElseThrow(()->new RuntimeException("Không tìm thấy địa chỉ"));
         addressUser.setDefaultAddress(myAddress.isDefaultAddress());
         addressUser.setFullName(myAddress.getFullName());
         addressUser.setPhone(myAddress.getPhone());
-        Address addressCom = addressRepository.findById(myAddress.getCommercalAddress()).orElseThrow(()->new RuntimeException("No such address"));
+        Address addressCom = addressRepository.findById(myAddress.getCommercalAddress()).orElseThrow(()->new RuntimeException("Không tìm thấy địa "));
         addressUser.setCommercalAddress(addressCom);
         addressUser.setDetailAddress(myAddress.getDetailAddress());
-        Address addressPro = addressRepository.findById(myAddress.getDistrictId()).orElseThrow(()->new RuntimeException("No such address"));
-        Address addressDis = addressRepository.findById(myAddress.getProvincialAddress()).orElseThrow(()->new RuntimeException("No such address"));
+        Address addressPro = addressRepository.findById(myAddress.getDistrictId()).orElseThrow(()->new RuntimeException("Không tìm thấy địa "));
+        Address addressDis = addressRepository.findById(myAddress.getProvincialAddress()).orElseThrow(()->new RuntimeException("Không tìm thấy địa "));
         addressUser.setDistrictAddress(addressDis);
         addressUser.setPhone(myAddress.getPhone());
         addressUser.setProvincialAddress(addressPro);
@@ -141,7 +141,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional(readOnly = true)
     @SneakyThrows
     public List<AddressDTO> getListNextLevel(String beforeLevel){
-        Address address = addressRepository.findById(beforeLevel).orElseThrow(()->new RuntimeException("No such address"));
+        Address address = addressRepository.findById(beforeLevel).orElseThrow(()->new RuntimeException("Không tìm thấy địa "));
         return addressRepository.findAllByBeforeLevel(address).stream().map(addressMapper::toAddressDTO).toList();
     }
 
@@ -154,7 +154,7 @@ public class AddressServiceImpl implements AddressService {
         log.info("Step 1: get data new address");
         Address newAddress = addressMapper.toAddress(address);
         if(address.getBeforeAddressId() != null && !address.getBeforeAddressId().isBlank()){
-            Address beforeAddress = addressRepository.findById(address.getBeforeAddressId()).orElseThrow(()->new RuntimeException("No such address"));
+            Address beforeAddress = addressRepository.findById(address.getBeforeAddressId()).orElseThrow(()->new RuntimeException("Không tìm thấy địa chỉ"));
             newAddress.setBeforeLevel(beforeAddress);
         }
         return  addressRepository.save(newAddress);

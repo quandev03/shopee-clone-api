@@ -92,14 +92,14 @@ public class UserServiceImple implements UserDetailsService {
         ResponseValidate responseValidate = new ValidationUtil<RequestRegister>().getMessage( requestRegister);
         if (!responseValidate.isValid()) {
             log.error("Lỗi dữ liệu đầu vào");
-            throw new RuntimeException(responseValidate.getMessages().toString());
+            throw new RuntimeException(responseValidate.getMessages().get(0));
         }
         if (userRepository.existsByUsername(requestRegister.getUsername())) {
             log.error("Username already exists");
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("Tài khoản đã tồn tại");
         } else if (userRepository.existsByPhoneNumber(requestRegister.getPhoneNumber())) {
             log.error("Phone number already exists");
-            throw new RuntimeException("Phone number already exists");
+            throw new RuntimeException("Số điện thoại đã tồn tại");
         } else {
             User newUser = modelMapper.map(requestRegister, User.class);
             newUser.setPassword( passwordEncoder.encode(requestRegister.getPassword()));
@@ -120,9 +120,9 @@ public class UserServiceImple implements UserDetailsService {
                 return new ResponseEntity<>(responseValidate.getMessages(), HttpStatus.BAD_REQUEST);
             }
             User user = userRepository.findByUsername(requestLogin.getUsername())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed, Account does not exist"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tài khoản không tồn tại, hoặc username không chính xác"));
             if(Boolean.FALSE.equals(user.getActive())){
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed, Account is blocked");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tài khoản đã bị khoá, vui lòng liên hệ quản trị viên để được hỗ trợ");
             }
 
             if (passwordEncoder.matches(requestLogin.getPassword(), user.getPassword())) {
@@ -135,7 +135,7 @@ public class UserServiceImple implements UserDetailsService {
                 return new ResponseEntity<>(responseDto, HttpStatus.OK);
             }
             else{
-                return new ResponseEntity<>("Login failed, Password is incorrect", HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>("Mật khẩu không chính xác", HttpStatus.UNAUTHORIZED);
             }
     }
 
@@ -151,9 +151,9 @@ public class UserServiceImple implements UserDetailsService {
             user.setPhoneNumber(requestUpdate.getPhone());
             user.setBirthday(requestUpdate.getBirthday());
             userRepository.save(user);
-            return new ResponseEntity<>("Update successful", HttpStatus.OK);
+            return new ResponseEntity<>("Cập nhật thành công", HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Update failed", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Cập nhật thất bại", HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -162,9 +162,9 @@ public class UserServiceImple implements UserDetailsService {
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         try{
             userRepository.delete(user);
-            return new ResponseEntity<>("Delete successful", HttpStatus.OK);
+            return new ResponseEntity<>("Xoá thành công", HttpStatus.OK);
         }catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User không tồn tại");
         }
     }
 
@@ -200,12 +200,12 @@ public class UserServiceImple implements UserDetailsService {
                     String password = passwordEncoder.encode(requestResetPass.getNewPassword());
                     user.setPassword(password);
                     userRepository.save(user);
-                    return new ResponseEntity<>("Reset password success" ,HttpStatus.OK);
+                    return new ResponseEntity<>("Cập thật mật khẩu thành công" ,HttpStatus.OK);
                 }else{
-                    return new ResponseEntity<>( "Reset password fail, The new password must not be the same as the old password",HttpStatus.UNAUTHORIZED);
+                    return new ResponseEntity<>( "Mật khẩu mới phải khác mật khẩu cũ",HttpStatus.UNAUTHORIZED);
                 }
             }else {
-                return new ResponseEntity<>("Password invalid" ,HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>("Mật khẩu không hợp lệ" ,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

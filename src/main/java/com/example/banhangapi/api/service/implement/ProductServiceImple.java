@@ -91,12 +91,12 @@ public class ProductServiceImple implements ProductService {
 
     public ResponseEntity<?> updateInfoProduct(String idProduct, RequestCreateProduct productUpdate ) {
         try {
-            ProductEntity product = productRepository.findById(idProduct).orElseThrow(()-> new ProductNotFoundException("Product not found"));
+            ProductEntity product = productRepository.findById(idProduct).orElseThrow(()-> new ProductNotFoundException("Không tìm thấy sản phẩm"));
             product.setPrice(productUpdate.getPrice());
             product.setQuantity(productUpdate.getQuantity());
             product.setDescription(productUpdate.getDescription());
             productRepository.save(product);
-            return new ResponseEntity<>("Update produce successfully", HttpStatus.OK);
+            return new ResponseEntity<>("Cập nhật thành công", HttpStatus.OK);
         }catch (Exception e){
             throw new RuntimeException(e.getMessage());
         }
@@ -109,7 +109,7 @@ public class ProductServiceImple implements ProductService {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             productRepository.deleteById(idProduce);
-            return new ResponseEntity<>("Delete produce successfully", HttpStatus.OK);
+            return new ResponseEntity<>("Xoá sản phẩm thành công", HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -119,7 +119,7 @@ public class ProductServiceImple implements ProductService {
     public ProductDTO getDataProduct(String idProduce) {
         try {
             log.info("get data product by idProduce {}", idProduce);
-                ProductEntity product = productRepository.findById(idProduce).orElseThrow(()-> new ProductNotFoundException("Product not found"));
+                ProductEntity product = productRepository.findById(idProduce).orElseThrow(()-> new ProductNotFoundException("Không tìm thấy sản phẩm"));
                 ProductDTO produceDTO = productMapper.toProductDTO(product);
                 productRepository.updateView(idProduce);
                 List<ImageResponseDTO> listImage = imageRepository.findAllByProduct(product).stream().map((imageMapper::toImageResponseDTO)).toList();
@@ -156,10 +156,10 @@ public class ProductServiceImple implements ProductService {
         Image image = new Image();
         image.setProduct(product);
         image.setPathImage(uploadFileDTO.getFile());
-        image.setDescription("anh san pham");
+        image.setDescription("Ảnh sản phẩm");
         image.setDefaultImage(isDefault);
         if(isDefault){
-            ProductEntity productEntity = productRepository.findById(id).orElseThrow(()-> new ProductNotFoundException("Product not found"));
+            ProductEntity productEntity = productRepository.findById(id).orElseThrow(()-> new ProductNotFoundException("Không tìm thấy sản phẩm"));
             productEntity.setImage(uploadFileDTO.getFile());
         }
 
@@ -167,7 +167,7 @@ public class ProductServiceImple implements ProductService {
         if(isDefault) {
             product.setImage(image1.getPathImage());
         }
-        return "SUCCESS";
+        return "Thành công";
     }
     @Override
     @SneakyThrows
@@ -180,7 +180,7 @@ public class ProductServiceImple implements ProductService {
     @Override
     @SneakyThrows
     public List<ProductDTO> getListProductByCategory(String categoryID){
-        Category category = categoryRepository.findById(categoryID).orElseThrow(()->new RuntimeException("Category not found"));
+        Category category = categoryRepository.findById(categoryID).orElseThrow(()->new RuntimeException("Không tìm thấy giỏ hàng"));
         return productRepository.findAllByCategory(category).stream().map(productMapper::toProductDTO).collect(Collectors.toList());
     }
 
