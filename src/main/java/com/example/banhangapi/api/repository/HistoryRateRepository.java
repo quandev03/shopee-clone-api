@@ -14,8 +14,8 @@ public interface HistoryRateRepository extends JpaRepository<HistoryRate, String
 
     @Query(value = """
         select count(*) from history_rate hr
-        where hr.order_id  = :orderhr.id\s
+        where hr.order_id  = :orderId
         and hr.created_by_id = :createBy
     """, nativeQuery = true)
-    Integer checkRateOrder(String orderhrId, String createBy);
+    Integer checkRateOrder(String orderId, String createBy);
 }

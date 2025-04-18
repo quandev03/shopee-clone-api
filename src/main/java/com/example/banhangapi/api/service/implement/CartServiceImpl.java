@@ -9,7 +9,6 @@ import com.example.banhangapi.api.repository.CartRepository;
 import com.example.banhangapi.api.repository.ProductRepository;
 import com.example.banhangapi.api.repository.UserRepository;
 import com.example.banhangapi.api.service.CartService;
-import com.example.banhangapi.api.service.UserService;
 import com.example.banhangapi.helper.handleException.ProductNotFoundException;
 import com.example.banhangapi.helper.handleException.UserNotFoundException;
 import jakarta.transaction.Transactional;
@@ -22,7 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)

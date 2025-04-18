@@ -92,6 +92,7 @@ public class UserServiceImple implements UserDetailsService {
         ResponseValidate responseValidate = new ValidationUtil<RequestRegister>().getMessage( requestRegister);
         if (!responseValidate.isValid()) {
             log.error("Lỗi dữ liệu đầu vào");
+            responseValidate.getMessages().forEach(log::error);
             throw new RuntimeException(responseValidate.getMessages().get(0));
         }
         if (userRepository.existsByUsername(requestRegister.getUsername())) {
