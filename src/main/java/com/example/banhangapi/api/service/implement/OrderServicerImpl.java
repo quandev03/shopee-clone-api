@@ -103,7 +103,7 @@ public class OrderServicerImpl implements OrderService {
         });
         return sumAmount.get();
     }
-    public Page<OrderDTP> getOrderAdmin(String dateFrom, String dateTo) {
+    public List<OrderDTP> getOrderAdmin(String dateFrom, String dateTo) {
         try{
             LocalDateTime from = null,  to = null;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -113,8 +113,8 @@ public class OrderServicerImpl implements OrderService {
             if(dateTo != null && !dateTo.isEmpty()){
                 to = LocalDateTime.parse(dateTo, formatter);
             }
-            Page<Order> orders = orderRepository.findOrdersByCreateTimeRange(from, to);
-            return orders.map(orderMapper::toOrderDTPDTOList);
+            List<Order> orders = orderRepository.findOrdersByCreateTimeRange(from, to);
+            return orders.stream().map(orderMapper::toOrderDTPDTOList).toList();
         }catch (Exception e){
             log.error(e.getMessage());
             throw e;

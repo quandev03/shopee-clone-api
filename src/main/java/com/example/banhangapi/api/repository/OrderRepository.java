@@ -60,7 +60,7 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
         AND (:endDate IS NULL OR o.createTime <= :endDate) 
         ORDER BY o.createTime DESC
     """)
-    Page<Order> findOrdersByCreateTimeRange(@Param("startDate") LocalDateTime startDate,
+    List<Order> findOrdersByCreateTimeRange(@Param("startDate") LocalDateTime startDate,
                                             @Param("endDate") LocalDateTime endDate);
 
     @Transactional

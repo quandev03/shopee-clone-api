@@ -11,7 +11,7 @@ import java.util.List;
 public interface OrderService {
     void createNewOrder(String cartId, String addressUserId, String voucherCode);
     List<Order> getOrderStatusForUser(StatusOrder statusOrder);
-    Page<OrderDTP> getOrderAdmin(String dateFrom, String dateTo);
+    List<OrderDTP> getOrderAdmin(String dateFrom, String dateTo);
     void updateOrderStatus(String orderId, String statusOrderStr);
     void rateProduct(String orderId, int rate);
 }
