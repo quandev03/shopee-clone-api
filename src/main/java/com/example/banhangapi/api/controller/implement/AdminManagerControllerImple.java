@@ -104,9 +104,8 @@ public class AdminManagerControllerImple implements AdminManagerController {
     }
 
     @Override
-    public ResponseEntity<Object> getOrderAdmin(String dateFrom, String dateTo, int page) {
-        Pageable pageable = PageRequest.of(page-1, 5);
-        return ResponseEntity.ok(orderService.getOrderAdmin(pageable, dateFrom, dateTo));
+    public ResponseEntity<Object> getOrderAdmin(String dateFrom, String dateTo) {
+        return ResponseEntity.ok(orderService.getOrderAdmin(dateFrom, dateTo));
     }
 
 }

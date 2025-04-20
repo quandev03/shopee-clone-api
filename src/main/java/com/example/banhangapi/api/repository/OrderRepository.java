@@ -29,7 +29,7 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
         SELECT SUM(o.quantity * p.price)
         FROM orders o
         JOIN o.productEntity p
-        WHERE o.statusOrder = 0
+        WHERE o.statusOrder = 3
     """)
     Double getTotalAmountInDash();
     @Query("""
@@ -61,8 +61,7 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
         ORDER BY o.createTime DESC
     """)
     Page<Order> findOrdersByCreateTimeRange(@Param("startDate") LocalDateTime startDate,
-                                            @Param("endDate") LocalDateTime endDate,
-                                            Pageable pageable);
+                                            @Param("endDate") LocalDateTime endDate);
 
     @Transactional
     @Modifying

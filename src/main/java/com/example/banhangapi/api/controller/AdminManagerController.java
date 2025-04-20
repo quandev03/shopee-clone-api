@@ -71,6 +71,6 @@ public interface AdminManagerController {
     void lockUnlockAccount(@RequestParam String id);
 
     @GetMapping("get-order-admin")
-    ResponseEntity<Object> getOrderAdmin(@RequestParam(value = "dateFrom", required = false) String dateFrom, @RequestParam(value = "dateTo", required = false) String dateTo, @RequestParam(name = "page", required = false, defaultValue = "1") int page);
+    ResponseEntity<Object> getOrderAdmin(@RequestParam(value = "dateFrom", required = false) String dateFrom, @RequestParam(value = "dateTo", required = false) String dateTo);
 
 }
