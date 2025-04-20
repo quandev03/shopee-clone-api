@@ -124,7 +124,7 @@ public class OrderServicerImpl implements OrderService {
     @Override
     public void updateOrderStatus(String orderId, String statusOrderStr) {
         Integer statusOrder = convertStatus(statusOrderStr).ordinal();
-        if(statusOrder.equals(StatusOrder.ORDER_SUCCESS)){
+        if(statusOrder == 3){
             productRepository.updateQuantityBuy(orderId);
         }
         orderRepository.updateStatus(orderId, statusOrder);

@@ -66,14 +66,16 @@ public interface ProductRepository  extends JpaRepository<ProductEntity, String>
             Pageable pageable
     );
 
+    @Modifying
+    @Transactional
     @Query(value = """
         UPDATE products p
-        JOIN cart c ON p.id = c.product_id
-        SET  p.quantity = p.quantity - c.quantity_buy,
-            p.sold_quantity = p.sold_quantity + c.quantity_buy
-        WHERE c.id = :cartId
+        JOIN orders o on o.product_entity_id = p.id
+        SET p.quantity = p.quantity - o.quantity,
+            p.sold_quantity = p.sold_quantity + o.quantity
+        WHERE o.id = :orderId
     """, nativeQuery = true)
-    void updateQuantityBuy(@Param("cartId") String cartId);
+    void updateQuantityBuy(@Param("orderId") String cartId);
 
     @Modifying
     @Transactional
