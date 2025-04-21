@@ -209,7 +209,7 @@ public class UserServiceImple implements UserDetailsService {
                 return new ResponseEntity<>("Mật khẩu không hợp lệ" ,HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return new ResponseEntity<>("Có lỗi sảy ra khi khẩu thay đổi mật " ,HttpStatus.BAD_REQUEST);
         }
 
     }
