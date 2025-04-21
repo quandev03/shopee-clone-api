@@ -118,7 +118,7 @@ public class UserServiceImple implements UserDetailsService {
             ResponseValidate responseValidate = new ValidationUtil<RequestLogin>().getMessage( requestLogin);
             if (!responseValidate.isValid()) {
                 log.error(responseValidate.getMessages().toString());
-                return new ResponseEntity<>(responseValidate.getMessages(), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(responseValidate.getMessages().get(0), HttpStatus.BAD_REQUEST);
             }
             User user = userRepository.findByUsername(requestLogin.getUsername())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tài khoản không tồn tại, hoặc username không chính xác"));
